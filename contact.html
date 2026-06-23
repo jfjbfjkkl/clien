@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Compte | Nebula Market</title>
+    <meta name="description" content="Connectez-vous ou créez votre compte Nebula Market pour suivre vos commandes et retrouver vos favoris.">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body class="account-page">
+    <div class="page-loader" data-loader><span></span></div>
+    <header class="site-header"><a class="brand" href="index.html"><span class="brand-mark">N</span><span>Nebula Market</span></a></header>
+    <main>
+      <section class="account-hero page-enter">
+        <div>
+          <p class="eyebrow">Compte utilisateur</p>
+          <h1>Votre espace personnel</h1>
+          <p>Connectez-vous, créez votre compte et gardez vos commandes, favoris et informations au même endroit.</p>
+        </div>
+      </section>
+
+      <section class="account-shell" aria-label="Connexion et creation de compte">
+        <form class="account-card" data-account-form="login" novalidate>
+          <div class="account-card-heading">
+            <p class="eyebrow">Connexion</p>
+            <h2>Se connecter</h2>
+          </div>
+          <label>Adresse e-mail
+            <input type="email" name="email" autocomplete="email" placeholder="vous@email.com" required>
+            <small data-field-error></small>
+          </label>
+          <label>Mot de passe
+            <input type="password" name="password" autocomplete="current-password" placeholder="Votre mot de passe" minlength="6" required>
+            <small data-field-error></small>
+          </label>
+          <div class="account-options">
+            <label class="account-check"><input type="checkbox" name="remember"> Se souvenir de moi</label>
+            <a href="#forgot-password">Mot de passe oublié</a>
+          </div>
+          <p class="account-form-message" data-form-message></p>
+          <button type="submit">Se connecter</button>
+        </form>
+
+        <form class="account-card account-card-register" data-account-form="register" novalidate>
+          <div class="account-card-heading">
+            <p class="eyebrow">Création de compte</p>
+            <h2>Créer mon compte</h2>
+          </div>
+          <label>Nom complet
+            <input type="text" name="fullName" autocomplete="name" placeholder="Votre nom complet" required>
+            <small data-field-error></small>
+          </label>
+          <label>Adresse e-mail
+            <input type="email" name="email" autocomplete="email" placeholder="vous@email.com" required>
+            <small data-field-error></small>
+          </label>
+          <label>Numéro de téléphone <span>optionnel</span>
+            <input type="tel" name="phone" autocomplete="tel" placeholder="+228 00 00 00 00">
+            <small data-field-error></small>
+          </label>
+          <div class="account-field-grid">
+            <label>Mot de passe
+              <input type="password" name="password" autocomplete="new-password" placeholder="Minimum 6 caractères" minlength="6" required>
+              <small data-field-error></small>
+            </label>
+            <label>Confirmation
+              <input type="password" name="confirmPassword" autocomplete="new-password" placeholder="Confirmer" minlength="6" required>
+              <small data-field-error></small>
+            </label>
+          </div>
+          <label class="account-check account-terms">
+            <input type="checkbox" name="terms" required>
+            <span>J'accepte les conditions d'utilisation</span>
+            <small data-field-error></small>
+          </label>
+          <p class="account-form-message" data-form-message></p>
+          <button type="submit">Créer mon compte</button>
+        </form>
+      </section>
+
+      <section class="page-shell account-support" id="support">
+        <div class="page-panel">
+          <p class="eyebrow">Assistance</p>
+          <h2>Besoin d'aide ?</h2>
+          <p id="forgot-password">Pour réinitialiser votre mot de passe, renseignez votre e-mail dans l'espace de connexion puis contactez le support si nécessaire.</p>
+          <p id="faq">Notre équipe vous accompagne pour les questions de commande, de livraison, de favoris et de compte utilisateur.</p>
+          <p id="refund">Les demandes de remboursement sont traitées selon le statut de préparation, de livraison ou d'activation du produit.</p>
+          <p id="privacy">Vos données sont utilisées uniquement pour la sécurité du compte, le suivi de commande et l'assistance client.</p>
+          <p id="legal">Les conditions d'utilisation encadrent les achats, les paiements, les livraisons et l'utilisation du compte Nebula Market.</p>
+        </div>
+      </section>
+    </main>
+    <script src="script.js"></script>
+    <div class="toast" data-toast role="status" aria-live="polite"></div>
+  </body>
+</html>

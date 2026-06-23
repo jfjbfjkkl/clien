@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Nebula Market | Marketplace physique et digitale</title>
+    <meta name="description" content="Marketplace moderne pour produits physiques, avec un sous-site premium dédié aux produits digitaux.">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="page-loader" data-loader>
+      <span></span>
+    </div>
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="Nebula Market accueil">
+        <span class="brand-mark">N</span>
+        <span>Nebula Market</span>
+      </a>
+      <nav class="main-nav" aria-label="Navigation principale">
+        <a class="is-active" href="index.html" aria-current="page">Accueil</a>
+        <a href="boutique.html">Boutique Physique</a>
+        <a href="digital.html">Produits Digitaux</a>
+      </nav>
+      <div class="header-tools" aria-label="Outils">
+        <button class="icon-button" type="button" aria-label="Recherche" data-open-search>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4.2-4.2"></path></svg>
+        </button>
+        <button class="icon-button" type="button" aria-label="Favoris" data-toggle-favorites>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.5 12.6 12 20l-7.5-7.4a5 5 0 0 1 7.1-7.1l.4.4.4-.4a5 5 0 1 1 7.1 7.1Z"></path></svg>
+        </button>
+        <button class="icon-button cart-button" type="button" aria-label="Panier">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="20" r="1.5"></circle><circle cx="18" cy="20" r="1.5"></circle><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.5L21 8H7"></path></svg>
+          <span data-cart-count>0</span>
+        </button>
+        <button class="account-button" type="button" data-go="contact.html">Compte</button>
+      </div>
+    </header>
+
+    <div class="search-panel" data-search-panel hidden>
+      <label for="global-search">Recherche globale</label>
+      <div class="search-row">
+        <input id="global-search" type="search" placeholder="Rechercher téléphone, baskets, Netflix, carte cadeau...">
+        <button type="button" data-close-search>Fermer</button>
+      </div>
+    </div>
+
+    <div class="category-modal" data-category-modal hidden>
+      <div class="category-backdrop" data-close-categories></div>
+      <section class="category-dialog" role="dialog" aria-modal="true" aria-labelledby="category-modal-title">
+        <button class="modal-close" type="button" aria-label="Fermer les catégories" data-close-categories>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+        </button>
+        <div class="category-modal-heading">
+          <div>
+            <p class="eyebrow">Catalogue sélectionné</p>
+            <h2 id="category-modal-title">Explorer les catégories</h2>
+            <p>Accédez rapidement aux univers essentiels de la boutique.</p>
+          </div>
+          <span class="category-modal-count">8 univers</span>
+        </div>
+        <div class="category-modal-grid">
+          <a class="category-featured" href="boutique.html#catalogue" data-close-categories><span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="12" rx="2"></rect><path d="M8 21h8M12 17v4"></path></svg></span><strong>Électronique</strong><em>Audio, mobile, accessoires tech</em><i>→</i></a>
+          <a class="category-featured" href="boutique.html#catalogue" data-close-categories><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7a4 4 0 0 1 8 0"></path><path d="M5 7h14l1 14H4Z"></path></svg></span><strong>Mode</strong><em>Sacs, chaussures, tenues</em><i>→</i></a>
+          <a href="boutique.html#catalogue" data-close-categories><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7"></path><path d="M5 9v12h14V9M9 21v-7h6v7"></path></svg></span><strong>Maison</strong><em>Décoration, rangement, confort</em><i>→</i></a>
+          <a href="boutique.html#catalogue" data-close-categories><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c4 3 6 6 6 10a6 6 0 0 1-12 0c0-4 2-7 6-10Z"></path><path d="M9 15c1 1 2 2 5 1"></path></svg></span><strong>Beauté</strong><em>Soins, parfums, essentiels</em><i>→</i></a>
+          <a href="boutique.html#catalogue" data-close-categories><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M19 5l-3 3M8 16l-3 3"></path></svg></span><strong>Accessoires</strong><em>Objets utiles du quotidien</em><i>→</i></a>
+          <a href="boutique.html#catalogue" data-close-categories><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"></path></svg></span><strong>Sport</strong><em>Fitness, training, outdoor</em><i>→</i></a>
+          <a href="boutique.html#catalogue" data-close-categories><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 11 2-5h10l2 5"></path><path d="M3 11h18v7H3Z"></path><circle cx="7" cy="18" r="2"></circle><circle cx="17" cy="18" r="2"></circle></svg></span><strong>Automobile</strong><em>Supports, chargeurs, entretien</em><i>→</i></a>
+          <a href="boutique.html#catalogue" data-close-categories><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="19" cy="12" r="1.5"></circle></svg></span><strong>Plus</strong><em>Nouveaux univers à découvrir</em><i>→</i></a>
+        </div>
+      </section>
+    </div>
+
+    <main>
+      <section class="marketplace-banner page-enter">
+        <img src="assets/home-hero-champagne.png" width="1774" height="887" fetchpriority="high" decoding="async" alt="Sélection premium de produits technologiques">
+        <div><p class="eyebrow">Boutique Physique</p><h1>Tout ce qu'il vous faut au même endroit</h1><p>Des milliers de références sélectionnées, avec paiement sécurisé et livraison suivie.</p><a class="primary-button" href="#catalogue">Explorer les produits</a></div>
+      </section>
+
+      <section class="marketplace-categories" aria-label="Catégories principales">
+        <button class="is-active" type="button" data-category-quick="all"><span>Tout</span>Tous les produits</button>
+        <button type="button" data-category-quick="electronique"><span>01</span>Électronique</button>
+        <button type="button" data-category-quick="mode"><span>02</span>Mode</button>
+        <button type="button" data-category-quick="maison"><span>03</span>Maison</button>
+        <button type="button" data-category-quick="beaute"><span>04</span>Beauté</button>
+        <button type="button" data-category-quick="sport"><span>05</span>Sport</button>
+      </section>
+
+      <section class="marketplace-shell" id="catalogue">
+        <aside class="catalog-filters" data-catalog-filters>
+          <div class="filter-heading"><strong>Filtres</strong><button type="button" data-reset-filters>Réinitialiser</button></div>
+          <fieldset><legend>Catégories</legend><label><input type="radio" name="catalog-category" value="all" checked> Toutes</label><label><input type="radio" name="catalog-category" value="electronique"> Électronique</label><label><input type="radio" name="catalog-category" value="mode"> Mode</label><label><input type="radio" name="catalog-category" value="maison"> Maison</label><label><input type="radio" name="catalog-category" value="beaute"> Beauté</label><label><input type="radio" name="catalog-category" value="sport"> Sport</label></fieldset>
+          <fieldset><legend>Prix</legend><label><input type="radio" name="catalog-price" value="all" checked> Tous les prix</label><label><input type="radio" name="catalog-price" value="under-20000"> Moins de 20 000 FCFA</label><label><input type="radio" name="catalog-price" value="20000-40000"> 20 000 à 40 000 FCFA</label><label><input type="radio" name="catalog-price" value="over-40000"> Plus de 40 000 FCFA</label></fieldset>
+          <fieldset><legend>Marques</legend><label><input type="checkbox" name="catalog-brand" value="novatech"> Novatech</label><label><input type="checkbox" name="catalog-brand" value="atelier"> Atelier</label><label><input type="checkbox" name="catalog-brand" value="purehome"> PureHome</label><label><input type="checkbox" name="catalog-brand" value="vita"> Vita</label></fieldset>
+          <fieldset><legend>Avantages</legend><label><input type="checkbox" data-filter-promo> En promotion</label><label><input type="checkbox" data-filter-stock> Disponible</label><label><input type="checkbox" data-filter-rating> Note 4+ étoiles</label></fieldset>
+        </aside>
+
+        <div class="catalog-content">
+          <div class="catalog-toolbar"><div><button class="filter-toggle" type="button" data-toggle-filters>Filtres</button><p><strong data-results-count>12</strong> produits trouvés</p></div><label>Trier par<select data-catalog-sort><option value="popular">Popularité</option><option value="price-asc">Prix croissant</option><option value="price-desc">Prix décroissant</option><option value="rating">Meilleures notes</option></select></label></div>
+          <div class="catalog-skeleton" data-catalog-skeleton hidden aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="market-product-grid" data-catalog-grid>
+            <article class="market-product-card" data-catalog-product data-category="electronique" data-brand="novatech" data-price="34900" data-rating="4.8" data-promo="true" data-stock="true" data-product-id="headphones-studio" data-product-name="Casque audio Studio Pro" data-product-price="34 900 FCFA" data-product-media="sheet-headphones"><div class="market-product-image sheet-headphones"><span>-18%</span></div><button class="favorite-toggle" type="button" aria-label="Ajouter aux favoris" data-favorite-product>♡</button><p class="market-brand">Novatech</p><h3>Casque audio Studio Pro</h3><div class="market-rating">★★★★★ <span>4,8 · 326</span></div><div class="market-price"><strong>34 900 FCFA</strong><del>42 500</del></div><div class="market-actions"><a href="product.html?id=headphones-studio">Voir</a><button type="button" data-add-cart>Acheter</button></div></article>
+            <article class="market-product-card" data-catalog-product data-category="electronique" data-brand="novatech" data-price="42000" data-rating="4.7" data-promo="false" data-stock="true" data-product-id="smartwatch-active" data-product-name="Montre connectée Active" data-product-price="42 000 FCFA" data-product-media="sheet-watch"><div class="market-product-image sheet-watch"></div><button class="favorite-toggle" type="button" aria-label="Ajouter aux favoris" data-favorite-product>♡</button><p class="market-brand">Novatech</p><h3>Montre connectée Active</h3><div class="market-rating">★★★★★ <span>4,7 · 184</span></div><div class="market-price"><strong>42 000 FCFA</strong></div><div class="market-actions"><a href="product.html?id=smartwatch-active">Voir</a><button type="button" data-add-cart>Acheter</button></div></article>
+            <article class="market-product-card" data-catalog-product data-category="mode" data-brand="atelier" data-price="31500" data-rating="4.9" data-promo="true" data-stock="true" data-product-id="urban-backpack" data-product-name="Sac urbain premium" data-product-price="31 500 FCFA" data-product-media="sheet-bag"><div class="market-product-image sheet-bag"><span>-12%</span></div><button class="favorite-toggle" type="button" aria-label="Ajouter aux favoris" data-favorite-product>♡</button><p class="market-brand">Atelier</p><h3>Sac urbain premium</h3><div class="market-rating">★★★★★ <span>4,9 · 241</span></div><div class="market-price"><strong>31 500 FCFA</strong><del>35 900</del></div><div class="market-actions"><a href="product.html?id=urban-backpack">Voir</a><button type="button" data-add-cart>Acheter</button></div></article>
+            <article class="market-product-card" data-catalog-product data-category="mode" data-brand="atelier" data-price="28900" data-rating="4.6" data-promo="false" data-stock="true" data-product-id="minimal-sneakers" data-product-name="Sneakers minimalistes" data-product-price="28 900 FCFA" data-product-media="sheet-shoes"><div class="market-product-image sheet-shoes"></div><button class="favorite-toggle" type="button" aria-label="Ajouter aux favoris" data-favorite-product>♡</button><p class="market-brand">Atelier</p><h3>Sneakers minimalistes</h3><div class="market-rating">★★★★★ <span>4,6 · 98</span></div><div class="market-price"><strong>28 900 FCFA</strong></div><div class="market-actions"><a href="product.html?id=minimal-sneakers">Voir</a><button type="button" data-add-cart>Acheter</button></div></article>
+            <article class="market-product-card" data-catalog-product data-category="maison" data-brand="purehome" data-price="18500" data-rating="4.8" data-promo="true" data-stock="true" data-product-id="halo-lamp" data-product-name="Lampe de table Halo" data-product-price="18 500 FCFA" data-product-media="sheet-lamp"><div class="market-product-image sheet-lamp"><span>-20%</span></div><button class="favorite-toggle" type="button" aria-label="Ajouter aux favoris" data-favorite-product>♡</button><p class="market-brand">PureHome</p><h3>Lampe de table Halo</h3><div class="market-rating">★★★★★ <span>4,8 · 167</span></div><div class="market-price"><strong>18 500 FCFA</strong><del>23 000</del></div><div class="market-actions"><a href="product.html?id=halo-lamp">Voir</a><button type="button" data-add-cart>Acheter</button></div></article>
+            <article class="market-product-card" data-catalog-product data-category="maison" data-brand="purehome" data-price="39900" data-rating="4.5" data-promo="false" data-stock="true" data-product-id="air-purifier" data-product-name="Purificateur d’air Compact" data-product-price="39 900 FCFA" data-product-media="sheet-purifier"><div class="market-product-image sheet-purifier"></div><button class="favorite-toggle" type="button" aria-label="Ajouter aux favoris" data-favorite-product>♡</button><p class="market-brand">PureHome</p><h3>Purificateur d’air Compact</h3><div class="market-rating">★★★★★ <span>4,5 · 73</span></div><div class="market-price"><strong>39 900 FCFA</strong></div><div class="market-actions"><a href="product.html?id=air-purifier">Voir</a><button type="button" data-add-cart>Acheter</button></div></article>
+            <article class="market-product-card" data-catalog-product data-category="beaute" data-brand="vita" data-price="14900" data-rating="4.9" data-promo="true" data-stock="true" data-product-id="serum-glow" data-product-name="Sérum visage Glow" data-product-price="14 900 FCFA" data-product-media="sheet-serum"><div class="market-product-image sheet-serum"><span>-15%</span></div><button class="favorite-toggle" type="button" aria-label="Ajouter aux favoris" data-favorite-product>♡</button><p class="market-brand">Vita</p><h3>Sérum visage Glow</h3><div class="market-rating">★★★★★ <span>4,9 · 412</span></div><div class="market-price"><strong>14 900 FCFA</strong><del>17 500</del></div><div class="market-actions"><a href="product.html?id=serum-glow">Voir</a><button type="button" data-add-cart>Acheter</button></div></article>
+            <article class="market-product-card" data-catalog-product data-category="sport" data-brand="vita" data-price="9900" data-rating="4.7" data-promo="false" data-stock="true" data-product-id="steel-bottle" data-product-name="Gourde isotherme Inox" data-product-price="9 900 FCFA" data-product-media="sheet-bottle"><div class="market-product-image sheet-bottle"></div><button class="favorite-toggle" type="button" aria-label="Ajouter aux favoris" data-favorite-product>♡</button><p class="market-brand">Vita</p><h3>Gourde isotherme Inox</h3><div class="market-rating">★★★★★ <span>4,7 · 205</span></div><div class="market-price"><strong>9 900 FCFA</strong></div><div class="market-actions"><a href="product.html?id=steel-bottle">Voir</a><button type="button" data-add-cart>Acheter</button></div></article>
+            <article class="market-product-card" data-catalog-product data-category="electronique" data-brand="novatech" data-price="27900" data-rating="4.4" data-promo="true" data-stock="true" data-product-id="headphones-lite" data-product-name="Casque sans fil Lite" data-product-price="27 900 FCFA" data-product-media="sheet-headphones"><div class="market-product-image sheet-headphones"><span>-10%</span></div><button class="favorite-toggle" type="button" aria-label="Ajouter aux favoris" data-favorite-product>♡</button><p class="market-brand">Novatech</p><h3>Casque sans fil Lite</h3><div class="market-rating">★★★★☆ <span>4,4 · 89</span></div><div class="market-price"><strong>27 900 FCFA</strong><del>31 000</del></div><div class="market-actions"><a href="product.html?id=headphones-lite">Voir</a><button type="button" data-add-cart>Acheter</button></div></article>
+            <article class="market-product-card" data-catalog-product data-category="mode" data-brand="atelier" data-price="24500" data-rating="4.5" data-promo="false" data-stock="false" data-product-id="city-backpack" data-product-name="Sac à dos City" data-product-price="24 500 FCFA" data-product-media="sheet-bag"><div class="market-product-image sheet-bag"></div><button class="favorite-toggle" type="button" aria-label="Ajouter aux favoris" data-favorite-product>♡</button><p class="market-brand">Atelier</p><h3>Sac à dos City</h3><div class="market-rating">★★★★★ <span>4,5 · 64</span></div><div class="market-price"><strong>24 500 FCFA</strong></div><div class="market-actions"><a href="product.html?id=city-backpack">Voir</a><button type="button" data-add-cart>Acheter</button></div></article>
+            <article class="market-product-card" data-catalog-product data-category="maison" data-brand="purehome" data-price="12500" data-rating="4.3" data-promo="false" data-stock="true" data-product-id="desk-lamp" data-product-name="Lampe d’appoint Mini" data-product-price="12 500 FCFA" data-product-media="sheet-lamp"><div class="market-product-image sheet-lamp"></div><button class="favorite-toggle" type="button" aria-label="Ajouter aux favoris" data-favorite-product>♡</button><p class="market-brand">PureHome</p><h3>Lampe d’appoint Mini</h3><div class="market-rating">★★★★☆ <span>4,3 · 52</span></div><div class="market-price"><strong>12 500 FCFA</strong></div><div class="market-actions"><a href="product.html?id=desk-lamp">Voir</a><button type="button" data-add-cart>Acheter</button></div></article>
+            <article class="market-product-card" data-catalog-product data-category="beaute" data-brand="vita" data-price="18900" data-rating="4.8" data-promo="true" data-stock="true" data-product-id="serum-duo" data-product-name="Duo sérums essentiels" data-product-price="18 900 FCFA" data-product-media="sheet-serum"><div class="market-product-image sheet-serum"><span>-22%</span></div><button class="favorite-toggle" type="button" aria-label="Ajouter aux favoris" data-favorite-product>♡</button><p class="market-brand">Vita</p><h3>Duo sérums essentiels</h3><div class="market-rating">★★★★★ <span>4,8 · 138</span></div><div class="market-price"><strong>18 900 FCFA</strong><del>24 000</del></div><div class="market-actions"><a href="product.html?id=serum-duo">Voir</a><button type="button" data-add-cart>Acheter</button></div></article>
+          </div>
+          <div class="catalog-empty" data-catalog-empty hidden><strong>Aucun produit trouvé</strong><p>Essayez d’élargir vos filtres.</p></div>
+          <div class="catalog-load-more"><button type="button" data-load-more>Afficher plus de produits</button><span data-load-status>8 sur 12</span></div>
+        </div>
+      </section>
+
+      <section class="digital-preview digital-preview-gaming" id="digital" data-reveal>
+        <div class="digital-copy">
+          <p class="eyebrow digital-instant-label"><span aria-hidden="true"></span> Livraison instantanée</p>
+          <h2>Produits digitaux, livrés instantanément.</h2>
+          <p>Cartes cadeaux, abonnements et recharges de services numériques, avec confirmation rapide après paiement.</p>
+          <a class="gaming-portal-button" href="digital.html">
+            <span class="gaming-portal-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M7 9h10M7 13h5"></path></svg>
+            </span>
+            <span class="gaming-portal-copy"><strong>Voir tous les produits</strong><small>Explorer le catalogue digital</small></span>
+            <span class="gaming-portal-arrow" aria-hidden="true">→</span>
+          </a>
+        </div>
+        <div class="digital-catalog-preview" aria-label="Aperçu produits digitaux">
+          <a href="product.html?id=netflix" data-reveal><span>NF</span><strong>Netflix</strong><i>→</i></a>
+          <a href="product.html?id=spotify" data-reveal><span>SP</span><strong>Spotify Premium</strong><i>→</i></a>
+          <a href="product.html?id=google-play" data-reveal><span>GP</span><strong>Google Play</strong><i>→</i></a>
+          <a href="product.html?id=apple-gift-card" data-reveal><span>AP</span><strong>Apple Gift Card</strong><i>→</i></a>
+          <a href="digital.html#catalogue" data-reveal><span>RE</span><strong>Crédit mobile</strong><i>→</i></a>
+          <a href="digital.html#catalogue" data-reveal><span>AB</span><strong>Abonnements</strong><i>→</i></a>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="site-footer" data-reveal>
+      <div class="footer-top">
+        <div class="footer-about">
+          <a class="brand footer-brand" href="index.html" aria-label="Nebula Market accueil">
+            <span class="brand-mark">N</span>
+            <span>Nebula Market</span>
+          </a>
+          <p>Marketplace premium pour acheter des produits physiques et des produits digitaux rapides, sécurisés et clairement séparés.</p>
+          <div class="footer-proof">
+            <span>✓ Paiement sécurisé</span>
+            <span>✓ Livraison instantanée</span>
+            <span>✓ Support client</span>
+          </div>
+        </div>
+
+        <nav class="footer-column" aria-label="Catégories footer">
+          <h3>Catégories</h3>
+          <button type="button" data-open-categories>Électronique</button>
+          <button type="button" data-open-categories>Mode</button>
+          <button type="button" data-open-categories>Maison</button>
+          <button type="button" data-open-categories>Beauté</button>
+          <button type="button" data-open-categories>Sport</button>
+          <a href="digital.html">Produits digitaux</a>
+        </nav>
+
+        <nav class="footer-column" aria-label="Support footer">
+          <h3>Support</h3>
+          <a href="contact.html#faq">FAQ</a>
+          <a href="contact.html">Contact</a>
+          <a href="contact.html#support">Assistance client</a>
+          <a href="cart.html">Suivi commande</a>
+          <a href="contact.html#refund">Politique de remboursement</a>
+        </nav>
+
+        <nav class="footer-column" aria-label="Informations légales footer">
+          <h3>Informations légales</h3>
+          <a href="contact.html#legal">Conditions d’utilisation</a>
+          <a href="contact.html#privacy">Confidentialité</a>
+          <a href="contact.html#legal">Mentions légales</a>
+          <a href="checkout.html">Paiement sécurisé</a>
+        </nav>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2026 Nebula Market. Tous droits réservés.</p>
+        <p>Produits digitaux livrés après validation du paiement.</p>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <div class="toast" data-toast role="status" aria-live="polite"></div>
+  </body>
+</html>
