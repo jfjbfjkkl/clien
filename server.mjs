@@ -1298,8 +1298,10 @@ const handleAstralApi = async (request, response, pathname) => {
       const result = await astralRequest("/freefire/lookup", { method: "POST", body: { uid, region } });
       sendJson(response, 200, JSON.parse(hideSupplierName(JSON.stringify(result.payload))));
     } catch (error) {
-      if (pathname === "/api/catalog/player-lookup" && ([403, 504].includes(error.statusCode) || error.name === "TimeoutError")) {
-        sendJson(response, 503, { error: "La vérification automatique du pseudo n’est pas activée pour ce catalogue. Votre UID peut néanmoins être utilisé pour la recharge." });
+      if (pathname === "/api/catalog/player-lookup" && error.statusCode === 403) {
+        sendJson(response, 503, { error: "L’accès à la vérification automatique du pseudo n’est pas encore autorisé pour la clé API actuellement installée." });
+      } else if (pathname === "/api/catalog/player-lookup" && (error.statusCode === 504 || error.name === "TimeoutError")) {
+        sendJson(response, 504, { error: "Le service de vérification du pseudo ne répond pas actuellement. Réessayez dans quelques instants." });
       } else {
         throw error;
       }
