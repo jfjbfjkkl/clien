@@ -3,18 +3,21 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Nebula Digital | Produits digitaux instantanés</title>
-    <meta name="description" content="Sous-site Nebula Digital pour recharges, cartes cadeaux et abonnements avec livraison instantanée.">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="/assets/silverse-logo.png" type="image/png">
+    <title>SILVERSE DIGITAL | Produits digitaux instantanés</title>
+    <meta name="description" content="Sous-site SILVERSE DIGITAL pour recharges, cartes cadeaux et abonnements avec livraison instantanée.">
+    <link rel="canonical" href="__SITE_URL__/produits-digitaux">
+    <meta property="og:title" content="SILVERSE DIGITAL | Produits digitaux"><meta property="og:description" content="Produits digitaux et livraison rapide sur SILVERSE SHOP."><meta property="og:url" content="__SITE_URL__/produits-digitaux"><meta property="og:type" content="website">
+    <link rel="stylesheet" href="styles.css?v=20260929-4">
   </head>
   <body class="digital-page">
     <div class="page-loader" data-loader>
       <span></span>
     </div>
     <header class="site-header">
-      <a class="brand" href="index.html" aria-label="Nebula Market accueil">
-        <span class="brand-mark">N</span>
-        <span>Nebula Market</span>
+      <a class="brand" href="index.html" aria-label="SILVERSE SHOP accueil">
+        <span class="brand-mark">S</span>
+        <span>SILVERSE SHOP</span>
       </a>
       <nav class="main-nav" aria-label="Navigation principale">
         <a href="index.html">Accueil</a>
@@ -36,7 +39,7 @@
     <div class="search-panel" data-search-panel hidden>
       <label for="digital-search">Recherche globale</label>
       <div class="search-row">
-        <input id="digital-search" type="search" placeholder="Rechercher une recharge, Netflix, Spotify, Google Play...">
+        <input id="digital-search" type="search" placeholder="Rechercher une carte cadeau...">
         <button type="button" data-close-search>Fermer</button>
       </div>
     </div>
@@ -44,9 +47,9 @@
     <main>
       <section class="digital-hero page-enter">
         <div class="digital-hero-copy" data-reveal>
-          <p class="eyebrow">Nebula Digital</p>
-          <h1>Recharge, cartes cadeaux et abonnements.</h1>
-          <p>Une expérience premium pour les produits digitaux : paiement sécurisé, validation rapide et livraison instantanée après confirmation.</p>
+          <p class="eyebrow">SILVERSE DIGITAL</p>
+          <h1>Toutes vos cartes cadeaux, simplement.</h1>
+          <p>Découvrez les cartes et codes prépayés réellement disponibles, avec paiement sécurisé et livraison après confirmation.</p>
           <a class="primary-button" href="#catalogue">Explorer le catalogue</a>
         </div>
         <div class="delivery-panel" id="instant" data-reveal>
@@ -56,64 +59,19 @@
         </div>
       </section>
 
-      <section class="digital-discovery" id="catalogue">
-        <div class="digital-catalog-toolbar" data-reveal="up">
-          <div class="digital-search-field">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4.2-4.2"></path></svg>
-            <input type="search" placeholder="Rechercher une recharge, une carte ou un abonnement..." aria-label="Rechercher un produit digital" data-digital-search>
-          </div>
-          <div class="digital-filter-chips" aria-label="Filtrer le catalogue">
-            <button class="is-active" type="button" data-digital-filter="all">Tout</button>
-            <button type="button" data-digital-filter="jeux">Jeux</button>
-            <button type="button" data-digital-filter="recharges">Recharges</button>
-            <button type="button" data-digital-filter="giftcards">Carte cadeau</button>
-            <button type="button" data-digital-filter="subscriptions">Abonnements</button>
-          </div>
-          <label class="digital-sort">Trier<select data-digital-sort><option value="popular">Popularité</option><option value="new">Nouveautés</option><option value="price-asc">Prix croissant</option></select></label>
+      <section class="digital-gift-catalog" id="catalogue">
+        <div class="digital-gift-heading">
+          <div><p class="eyebrow">Cartes cadeaux</p><h2>Choisissez votre carte prépayée</h2><p>Montants et régions disponibles, actualisés automatiquement.</p></div>
+          <span data-digital-catalog-count>0 carte</span>
         </div>
-
-        <section class="digital-collection digital-games-collection" data-digital-group="jeux" data-reveal="scale">
-          <div class="digital-collection-heading"><div><p class="eyebrow">Jeux</p><h2>Recharges gaming instantanées</h2></div><span>Free Fire, PUBG Mobile et Call of Duty</span></div>
-          <div class="digital-standard-grid" data-digital-grid>
-            <article class="digital-special-card digital-standard-card" data-digital-product data-digital-category="jeux" data-rank="1" data-new="5" data-price="520" data-product-id="free-fire-diamonds" data-product-name="Diamants Free Fire" data-product-price="À partir de 520 FCFA"><div class="digital-product-visual digital-game-visual digital-game-freefire"><span class="digital-logo-mark">FF</span><span class="digital-promo-badge">Populaire</span></div><div class="digital-product-info"><span class="digital-product-type">Recharge jeu</span><h3>Diamants Free Fire</h3><p>Diamants livrés rapidement après validation du paiement.</p><strong>Dès 520 FCFA</strong><div class="digital-product-actions"><a href="product.html?id=free-fire-diamonds">Voir</a><button type="button" data-add-cart>Acheter</button></div></div></article>
-            <article class="digital-special-card digital-standard-card" data-digital-product data-digital-category="jeux" data-rank="2" data-new="4" data-price="1200" data-product-id="pubg-uc" data-product-name="UC PUBG Mobile" data-product-price="À partir de 1 200 FCFA"><div class="digital-product-visual digital-game-visual digital-game-pubg"><span class="digital-logo-mark">UC</span><span class="digital-promo-badge">Instant</span></div><div class="digital-product-info"><span class="digital-product-type">Recharge jeu</span><h3>UC PUBG Mobile</h3><p>Choisissez votre pack et recevez vos UC sans attente.</p><strong>Dès 1 200 FCFA</strong><div class="digital-product-actions"><a href="product.html?id=pubg-uc">Voir</a><button type="button" data-add-cart>Acheter</button></div></div></article>
-            <article class="digital-special-card digital-standard-card" data-digital-product data-digital-category="jeux" data-rank="3" data-new="3" data-price="1000" data-product-id="cod-mobile-cp" data-product-name="CP Call of Duty Mobile" data-product-price="À partir de 1 000 FCFA"><div class="digital-product-visual digital-game-visual digital-game-cod"><span class="digital-logo-mark">CP</span></div><div class="digital-product-info"><span class="digital-product-type">Recharge jeu</span><h3>Call of Duty Mobile CP</h3><p>Crédits mobiles activés rapidement pour vos achats en jeu.</p><strong>Dès 1 000 FCFA</strong><div class="digital-product-actions"><a href="product.html?id=cod-mobile-cp">Voir</a><button type="button" data-add-cart>Acheter</button></div></div></article>
-          </div>
-        </section>
-
-        <section class="digital-collection digital-recharges-collection" data-digital-group="recharges" data-reveal="scale">
-          <div class="digital-collection-heading"><div><p class="eyebrow">Recharges</p><h2>Crédit et forfaits disponibles rapidement</h2></div><span>Traitement immédiat après validation</span></div>
-          <div class="digital-standard-grid" data-digital-grid>
-            <article class="digital-special-card digital-standard-card" data-digital-product data-digital-category="recharges" data-rank="1" data-new="3" data-price="500" data-product-id="mobile-credit" data-product-name="Recharge crédit mobile" data-product-price="À partir de 500 FCFA"><div class="digital-product-visual"><span class="digital-logo-mark">RM</span><span class="digital-promo-badge">Populaire</span></div><div class="digital-product-info"><span class="digital-product-type">Crédit mobile</span><h3>Recharge mobile</h3><p>Rechargez rapidement votre numéro avec le montant de votre choix.</p><strong>Dès 500 FCFA</strong><div class="digital-product-actions"><a href="product.html?id=mobile-credit">Voir</a><button type="button" data-add-cart>Acheter</button></div></div></article>
-            <article class="digital-special-card digital-standard-card" data-digital-product data-digital-category="recharges" data-rank="2" data-new="5" data-price="1000" data-product-id="mobile-data" data-product-name="Forfait internet mobile" data-product-price="À partir de 1 000 FCFA"><div class="digital-product-visual"><span class="digital-logo-mark">4G</span><span class="digital-promo-badge">Nouveau</span></div><div class="digital-product-info"><span class="digital-product-type">Internet mobile</span><h3>Forfait Internet</h3><p>Choisissez un volume de données adapté à vos besoins.</p><strong>Dès 1 000 FCFA</strong><div class="digital-product-actions"><a href="product.html?id=mobile-data">Voir</a><button type="button" data-add-cart>Acheter</button></div></div></article>
-            <article class="digital-special-card digital-standard-card" data-digital-product data-digital-category="recharges" data-rank="3" data-new="2" data-price="1500" data-product-id="international-credit" data-product-name="Recharge internationale" data-product-price="À partir de 1 500 FCFA"><div class="digital-product-visual"><span class="digital-logo-mark">INT</span></div><div class="digital-product-info"><span class="digital-product-type">Crédit international</span><h3>Recharge internationale</h3><p>Envoyez du crédit mobile à vos proches en quelques étapes.</p><strong>Dès 1 500 FCFA</strong><div class="digital-product-actions"><a href="product.html?id=international-credit">Voir</a><button type="button" data-add-cart>Acheter</button></div></div></article>
-          </div>
-        </section>
-
-        <section class="digital-collection" data-digital-group="giftcards" data-reveal="left">
-          <div class="digital-collection-heading"><div><p class="eyebrow">Cartes cadeaux</p><h2>Des crédits pour toutes vos plateformes</h2></div><span>Codes vérifiés avant livraison</span></div>
-          <div class="digital-standard-grid" data-digital-grid>
-            <article class="digital-special-card digital-standard-card" data-digital-product data-digital-category="giftcards" data-rank="1" data-new="2" data-price="5000" data-product-id="google-play" data-product-name="Google Play" data-product-price="Codes vérifiés"><div class="digital-product-visual"><span class="digital-logo-mark">GP</span><span class="digital-promo-badge">Meilleure vente</span></div><div class="digital-product-info"><span class="digital-product-type">Applications et contenus</span><h3>Google Play</h3><p>Codes disponibles dans plusieurs montants.</p><strong>Dès 5 000 FCFA</strong><div class="digital-product-actions"><a href="product.html?id=google-play">Voir</a><button type="button" data-add-cart>Acheter</button></div></div></article>
-            <article class="digital-special-card digital-standard-card" data-digital-product data-digital-category="giftcards" data-rank="2" data-new="3" data-price="5000" data-product-id="apple-gift-card" data-product-name="Apple Gift Card" data-product-price="Pour apps et abonnements"><div class="digital-product-visual"><span class="digital-logo-mark">AP</span></div><div class="digital-product-info"><span class="digital-product-type">App Store et contenus</span><h3>Apple Gift Card</h3><p>Utilisable pour vos achats et abonnements Apple.</p><strong>Dès 5 000 FCFA</strong><div class="digital-product-actions"><a href="product.html?id=apple-gift-card">Voir</a><button type="button" data-add-cart>Acheter</button></div></div></article>
-            <article class="digital-special-card digital-standard-card" data-digital-product data-digital-category="giftcards" data-rank="4" data-new="1" data-price="3000" data-product-id="gift-cards" data-product-name="Cartes cadeaux multi-enseignes" data-product-price="Montants flexibles"><div class="digital-product-visual"><span class="digital-logo-mark">GC</span><span class="digital-promo-badge">Flexible</span></div><div class="digital-product-info"><span class="digital-product-type">Multi-enseignes</span><h3>Cartes cadeaux</h3><p>Une sélection de cartes pour différents usages.</p><strong>Dès 3 000 FCFA</strong><div class="digital-product-actions"><a href="product.html?id=gift-cards">Voir</a><button type="button" data-add-cart>Acheter</button></div></div></article>
-          </div>
-        </section>
-
-        <section class="digital-collection digital-collection-muted" data-digital-group="subscriptions" data-reveal="right">
-          <div class="digital-collection-heading"><div><p class="eyebrow">Abonnements</p><h2>Divertissement sans interruption</h2></div><span>Activation rapide</span></div>
-          <div class="digital-standard-grid" data-digital-grid>
-            <article class="digital-special-card digital-standard-card" data-digital-product data-digital-category="subscriptions" data-rank="1" data-new="2" data-price="3500" data-product-id="netflix" data-product-name="Abonnement Netflix" data-product-price="1 mois et plus"><div class="digital-product-visual"><span class="digital-logo-mark">NF</span><span class="digital-promo-badge">Populaire</span></div><div class="digital-product-info"><span class="digital-product-type">Streaming vidéo</span><h3>Netflix</h3><p>Formules mensuelles selon vos besoins.</p><strong>Dès 3 500 FCFA</strong><div class="digital-product-actions"><a href="product.html?id=netflix">Voir</a><button type="button" data-add-cart>Acheter</button></div></div></article>
-            <article class="digital-special-card digital-standard-card" data-digital-product data-digital-category="subscriptions" data-rank="2" data-new="3" data-price="2500" data-product-id="spotify" data-product-name="Spotify Premium" data-product-price="Premium instantané"><div class="digital-product-visual"><span class="digital-logo-mark">SP</span></div><div class="digital-product-info"><span class="digital-product-type">Musique premium</span><h3>Spotify Premium</h3><p>Écoute sans publicité et hors connexion.</p><strong>Dès 2 500 FCFA</strong><div class="digital-product-actions"><a href="product.html?id=spotify">Voir</a><button type="button" data-add-cart>Acheter</button></div></div></article>
-            <article class="digital-special-card digital-standard-card" data-digital-product data-digital-category="subscriptions" data-rank="3" data-new="5" data-price="3000" data-product-id="youtube-premium" data-product-name="YouTube Premium" data-product-price="Activation rapide"><div class="digital-product-visual"><span class="digital-logo-mark">YT</span><span class="digital-promo-badge">Nouveau</span></div><div class="digital-product-info"><span class="digital-product-type">Vidéo et musique</span><h3>YouTube Premium</h3><p>Profitez de vos contenus sans interruption.</p><strong>Dès 3 000 FCFA</strong><div class="digital-product-actions"><a href="product.html?id=youtube-premium">Voir</a><button type="button" data-add-cart>Acheter</button></div></div></article>
-          </div>
-        </section>
-
-        <section class="digital-editorial-row" data-reveal="scale">
-          <article><p class="eyebrow">Récemment ajoutés</p><h2>Nouvelles recharges et formules</h2><p>Forfaits Internet et nouveaux abonnements rejoignent le catalogue.</p><button type="button" data-digital-jump="new">Voir les nouveautés →</button></article>
-          <article><p class="eyebrow">Meilleures ventes</p><h2>Les choix de la communauté</h2><p>Recharge mobile, Google Play et Netflix restent les produits les plus demandés.</p><button type="button" data-digital-jump="popular">Voir les meilleures ventes →</button></article>
-        </section>
-
-        <div class="digital-catalog-empty" data-digital-empty hidden><strong>Aucun produit trouvé</strong><p>Essayez un autre mot-clé ou affichez toutes les catégories.</p></div>
+        <div class="gaming-catalog-search digital-gift-search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4.2-4.2"></path></svg>
+          <input type="search" placeholder="Rechercher Roblox, Garena, PUBG..." aria-label="Rechercher une carte cadeau" data-digital-gift-search>
+        </div>
+        <div class="market-product-grid gaming-api-grid" data-digital-catalog-grid aria-label="Cartes cadeaux disponibles">
+          <div class="catalog-empty"><strong>Chargement des cartes cadeaux</strong><p>Le catalogue est en cours de récupération.</p></div>
+        </div>
+        <div class="gaming-load-more"><button class="primary-button" type="button" data-digital-catalog-load-more hidden>Charger plus de cartes</button></div>
       </section>
 
       <section class="section split-section" data-reveal>
@@ -128,39 +86,11 @@
           <article data-reveal><span>3</span><strong>Livraison immédiate</strong><em>Disponible dans le compte</em></article>
         </div>
       </section>
-
-      <!-- Temporairement masqué : ce contenu sera déplacé vers Compte / Profil. -->
-      <section class="section activity-section" data-reveal hidden data-profile-content>
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">Espace client</p>
-            <h2>Historique et produits consultés</h2>
-          </div>
-        </div>
-        <div class="activity-grid">
-          <article class="activity-card" data-reveal>
-            <h3>Historique récent</h3>
-            <ul>
-              <li><span>Livré</span>Google Play 10 000 FCFA</li>
-              <li><span>Livré</span>Spotify Premium 1 mois</li>
-              <li><span>Validé</span>Recharge mobile 5 000 FCFA</li>
-            </ul>
-          </article>
-          <article class="activity-card" data-reveal>
-            <h3>Récemment consultés</h3>
-            <ul>
-              <li><span>Vu</span>Apple Gift Card</li>
-              <li><span>Vu</span>Forfait Internet mobile</li>
-              <li><span>Vu</span>Netflix mensuel</li>
-            </ul>
-          </article>
-        </div>
-      </section>
     </main>
 
     <footer class="site-footer simple-footer">
       <div>
-        <strong>Nebula Digital</strong>
+        <strong>SILVERSE DIGITAL</strong>
         <p>Le sous-site dédié aux produits digitaux instantanés.</p>
       </div>
       <nav aria-label="Liens footer">
@@ -170,7 +100,7 @@
       </nav>
     </footer>
 
-    <script src="script.js"></script>
+    <script src="script.js?v=20260929-4"></script>
     <div class="toast" data-toast role="status" aria-live="polite"></div>
   </body>
 </html>

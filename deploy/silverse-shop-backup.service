@@ -1,0 +1,13 @@
+[Unit]
+Description=Sauvegarde PostgreSQL SILVERSE SHOP
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/silverse-shop-backup
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/backups/silverse-shop

@@ -8,30 +8,28 @@ const routeAliases = {
   "jeux": "gaming.html",
   "categories": "categories.html",
   "paiement": "checkout.html",
-  "produit": "product.html"
+  "produit": "product.html",
+  "suivi": "tracking.html"
 };
 const routeSegment = window.location.pathname.split("/").filter(Boolean).pop() || "";
 const currentPage = routeAliases[routeSegment] || routeSegment || "index.html";
 const currentProductId = new URLSearchParams(window.location.search).get("id") || "";
-const gamingProductIds = ["free-fire-diamonds", "cod-mobile-cp", "pubg-uc", "roblox", "ea-fc-points", "mobile-legends"];
-const digitalProductIds = ["netflix", "spotify", "google-play", "apple-gift-card", "gift-cards"];
+const isApiProductRoute = currentProductId.startsWith("product-");
 const activeUniverse = currentPage === "index.html"
   ? "home"
   : currentPage === "gaming.html"
   ? "gaming"
   : currentPage === "digital.html"
     ? "digital"
-    : currentPage === "product.html" && gamingProductIds.includes(currentProductId)
+    : currentPage === "product.html" && isApiProductRoute
       ? "gaming"
-      : currentPage === "product.html" && digitalProductIds.includes(currentProductId)
-        ? "digital"
-        : currentPage === "product.html"
+      : currentPage === "product.html"
           ? "physical"
     : ["boutique.html", "categories.html"].includes(currentPage)
       ? "physical"
       : currentPage === "favorites.html"
         ? "favorites"
-        : currentPage === "cart.html" || currentPage === "checkout.html"
+        : currentPage === "cart.html" || currentPage === "checkout.html" || currentPage === "tracking.html"
           ? "cart"
           : currentPage === "contact.html"
             ? "account"
@@ -47,9 +45,9 @@ const sharedHeader = `
     <span></span><span></span><span></span>
   </button>
   <div class="header-primary">
-    <a class="brand" href="index.html" aria-label="Nebula Market accueil">
-      <span class="brand-mark">N</span>
-      <span>Nebula Market</span>
+    <a class="brand" href="index.html" aria-label="SILVERSE SHOP accueil">
+      <span class="brand-mark">S</span>
+      <span>SILVERSE SHOP</span>
     </a>
     <nav class="main-nav" aria-label="Navigation principale">
       ${navLink("home", "index.html", "Accueil")}
@@ -82,7 +80,7 @@ document.querySelector(".site-header")?.insertAdjacentHTML("afterend", `
     <div class="mobile-menu-backdrop" data-close-mobile-menu></div>
     <aside class="mobile-menu-drawer" role="dialog" aria-modal="true" aria-labelledby="mobile-menu-title">
       <header class="mobile-menu-header">
-        <a class="brand" href="index.html"><span class="brand-mark">N</span><span id="mobile-menu-title">Nebula Market</span></a>
+        <a class="brand" href="index.html"><span class="brand-mark">S</span><span id="mobile-menu-title">SILVERSE SHOP</span></a>
         <button class="mobile-menu-close" type="button" aria-label="Fermer le menu" data-close-mobile-menu>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
         </button>
@@ -102,16 +100,22 @@ document.querySelector(".site-header")?.insertAdjacentHTML("afterend", `
   </div>
 `);
 
-const renderHomeProduct = ({ id, name, brand, price, oldPrice = "", media, rating, reviews, badge = "" }) => `
-  <article class="market-product-card home-commerce-card" data-product-id="${id}" data-product-name="${name}" data-product-price="${price}" data-product-media="${media}">
-    <div class="market-product-image ${media}">${badge ? `<span>${badge}</span>` : ""}</div>
-    <button class="favorite-toggle" type="button" aria-label="Ajouter ${name} aux favoris" data-favorite-product>♡</button>
+const renderProductImage = (product, extraClass = "") => `
+  <span class="market-product-image ${product.photo ? "has-product-photo" : "product-image-placeholder"} ${escapeHtml(product.media || "media-blue")} ${escapeHtml(extraClass)}">
+    ${product.photo ? `<img src="${escapeHtml(product.photo)}" alt="${escapeHtml(product.name || "Produit")}" loading="lazy" decoding="async">` : `<span class="product-fallback"><b>${escapeHtml(String(product.name || "S").split(/\s+/).slice(0, 2).map((word) => word[0]).join("").toUpperCase())}</b><small>${escapeHtml(product.name || "SILVERSE SHOP")}</small></span>`}
+    ${product.badge ? `<span class="product-card-badge">${escapeHtml(product.badge)}</span>` : ""}
+  </span>
+`;
+
+const renderHomeProduct = ({ id, name, brand, price, oldPrice = "", media, rating, reviews, badge = "", photo = "", hasVariations = false }) => `
+  <article class="market-product-card home-commerce-card" role="link" tabindex="0" data-product-link="product.html?id=${encodeURIComponent(id)}" data-product-id="${escapeHtml(id)}" data-product-name="${escapeHtml(name)}" data-product-price="${escapeHtml(price)}" data-product-media="${escapeHtml(media)}" data-product-photo="${escapeHtml(photo)}">
+    ${renderProductImage({ media, badge, photo })}
+    <button class="favorite-toggle" type="button" aria-label="Ajouter ${escapeHtml(name)} aux favoris" data-favorite-product>♡</button>
     <div class="home-card-body">
-      <p class="market-brand">${brand}</p>
-      <h3>${name}</h3>
-      <div class="market-rating">★★★★★ <span>${rating} · ${reviews}</span></div>
-      <div class="market-price"><strong>${price}</strong>${oldPrice ? `<del>${oldPrice}</del>` : ""}</div>
-      <div class="market-actions"><a href="product.html?id=${id}">Voir</a><button type="button" data-add-cart>Acheter</button></div>
+      <p class="market-brand">SILVERSE SHOP</p>
+      <h3>${escapeHtml(name)}</h3>
+      <div class="market-rating">★★★★★ <span>${escapeHtml(rating)} · ${Number(reviews || 0)}</span></div>
+      <div class="market-price"><strong>${escapeHtml(price)}</strong>${oldPrice ? `<del>${escapeHtml(oldPrice)}</del>` : ""}</div>
     </div>
   </article>
 `;
@@ -130,19 +134,12 @@ const renderTypewriterLines = (lines) => {
 };
 
 if (currentPage === "index.html") {
-  const popularProducts = [
-    { id: "headphones-studio", name: "Casque audio Studio Pro", brand: "Novatech", price: "34 900 FCFA", oldPrice: "42 500", media: "sheet-headphones", rating: "4,8", reviews: "326", badge: "-18%" },
-    { id: "smartwatch-active", name: "Montre connectée Active", brand: "Novatech", price: "42 000 FCFA", media: "sheet-watch", rating: "4,7", reviews: "184", badge: "Top vente" },
-    { id: "urban-backpack", name: "Sac urbain premium", brand: "Atelier", price: "31 500 FCFA", oldPrice: "35 900", media: "sheet-bag", rating: "4,9", reviews: "241", badge: "-12%" },
-    { id: "halo-lamp", name: "Lampe de table Halo", brand: "PureHome", price: "18 500 FCFA", oldPrice: "23 000", media: "sheet-lamp", rating: "4,8", reviews: "167", badge: "-20%" },
-    { id: "serum-glow", name: "Sérum visage Glow", brand: "Vita", price: "14 900 FCFA", oldPrice: "17 500", media: "sheet-serum", rating: "4,9", reviews: "412", badge: "Favori" }
-  ];
   document.body.classList.add("home-page");
   document.querySelector("main").innerHTML = `
     <section class="home-hero page-enter">
       <img src="assets/home-hero-champagne.png" width="1774" height="887" fetchpriority="high" decoding="async" alt="Sélection premium de produits technologiques">
       <div class="home-hero-content">
-        <p class="eyebrow">Nebula Market</p>
+        <p class="eyebrow">SILVERSE SHOP</p>
         <h1 class="home-typewriter" aria-label="Tout ce qu'il vous faut au même endroit">${renderTypewriterLines(["Tout ce qu'il vous faut", "au même endroit"])}</h1>
         <p>Découvrez une plateforme unique pour vos achats quotidiens et vos services numériques.</p>
         <div class="home-hero-actions">
@@ -155,7 +152,7 @@ if (currentPage === "index.html") {
     <section class="home-mobile-search" aria-label="Recherche mobile">
       <div class="home-mobile-search-box">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4.2-4.2"></path></svg>
-        <input type="search" placeholder="Rechercher produits, jeux, catégories..." aria-label="Rechercher sur Nebula Market" data-home-mobile-search>
+        <input type="search" placeholder="Rechercher produits, jeux, catégories..." aria-label="Rechercher sur SILVERSE SHOP" data-home-mobile-search>
       </div>
       <div class="home-mobile-search-results" data-home-mobile-search-results hidden></div>
     </section>
@@ -177,10 +174,10 @@ if (currentPage === "index.html") {
 
     <section class="home-popular section" id="populaires" data-reveal="scale">
       <div class="section-heading">
-        <div><p class="eyebrow">Sélection du moment</p><h2>Produits populaires</h2></div>
-        <a class="section-link" href="boutique.html">Voir plus <span>→</span></a>
+        <div><p class="eyebrow">Sélection digitale</p><h2>Produits gaming disponibles</h2></div>
+        <a class="section-link" href="gaming.html">Voir plus <span>→</span></a>
       </div>
-      <div class="market-product-grid home-product-grid">${popularProducts.map(renderHomeProduct).join("")}</div>
+      <div class="market-product-grid home-product-grid" data-home-catalog-grid><p>Chargement des produits...</p></div>
     </section>
 
     <section class="home-channel-section home-physical-entry section" data-reveal="left">
@@ -201,37 +198,23 @@ if (currentPage === "index.html") {
         <div><p class="eyebrow">Univers des Jeux</p></div>
         <a class="section-link" href="gaming.html">Voir plus <span>→</span></a>
       </div>
-      <div class="home-gaming-grid">
-        <a class="home-game-card home-game-featured" href="product.html?id=free-fire-diamonds">
-          <span>Free Fire</span>
-          <p>Rechargez votre compte avec des diamants livrés rapidement.</p>
-          <i>Découvrir →</i>
-        </a>
-        <a class="home-game-card home-game-pubg" href="product.html?id=pubg-uc">
-          <span>PUBG Mobile</span>
-          <p>Plusieurs packs de UC disponibles selon vos besoins.</p>
-          <i>Voir →</i>
-        </a>
-        <a class="home-game-card home-game-cod" href="product.html?id=cod-mobile-cp">
-          <span>Call of Duty</span>
-          <p>Crédits CP prêts pour vos achats en jeu.</p>
-          <i>Voir →</i>
-        </a>
+      <div class="home-gaming-grid" data-home-gaming-grid>
+        <div class="catalog-empty"><strong>Catalogue en attente</strong><p>Les jeux disponibles vont apparaître ici.</p></div>
       </div>
     </section>
 
     <section class="home-digital-section" data-reveal="zoom">
       <div class="home-digital-intro">
         <p class="eyebrow home-digital-label"><span aria-hidden="true"></span> Livraison instantanée</p>
-        <h2>Produits digitaux, disponibles en quelques instants.</h2>
-        <p>Abonnements, cartes cadeaux et recharges activés rapidement après votre paiement.</p>
+        <h2>Cartes et recharges disponibles en quelques instants.</h2>
+        <p>Une sélection de produits disponibles, actualisée automatiquement depuis notre catalogue sécurisé.</p>
         <ul class="home-digital-benefits" aria-label="Avantages des produits digitaux">
           <li><span>01</span> Activation rapide</li>
           <li><span>02</span> Paiement sécurisé</li>
           <li><span>03</span> Assistance disponible</li>
         </ul>
         <a class="home-digital-cta" href="digital.html">
-          <span><strong>Explorer le catalogue</strong><small>Cartes, recharges et abonnements</small></span>
+          <span><strong>Explorer le catalogue</strong><small>Cartes cadeaux et codes prépayés</small></span>
           <i aria-hidden="true">→</i>
         </a>
       </div>
@@ -240,37 +223,13 @@ if (currentPage === "index.html") {
         <strong>Univers Produits Digitaux</strong>
         <a href="digital.html">Voir plus <span>→</span></a>
       </div>
-      <div class="home-digital-showcase" aria-label="Sélection de produits digitaux">
-        <a class="home-digital-tile home-digital-featured" href="product.html?id=netflix">
-          <span class="home-digital-media home-digital-media-netflix"><b>NETFLIX</b></span>
-          <span class="home-digital-tile-copy"><small>Streaming</small><strong>Abonnement Netflix</strong><em>Accès rapide</em></span>
-          <i aria-hidden="true">→</i>
-        </a>
-        <a class="home-digital-tile" href="product.html?id=spotify">
-          <span class="home-digital-media home-digital-media-spotify"><b>SP</b></span>
-          <span class="home-digital-tile-copy"><small>Musique</small><strong>Spotify Premium</strong></span>
-          <i aria-hidden="true">→</i>
-        </a>
-        <a class="home-digital-tile" href="product.html?id=google-play">
-          <span class="home-digital-media home-digital-media-google"><b>GP</b></span>
-          <span class="home-digital-tile-copy"><small>Carte cadeau</small><strong>Google Play</strong></span>
-          <i aria-hidden="true">→</i>
-        </a>
-        <a class="home-digital-tile" href="product.html?id=apple-gift-card">
-          <span class="home-digital-media home-digital-media-apple"><b>AP</b></span>
-          <span class="home-digital-tile-copy"><small>Carte cadeau</small><strong>Apple Gift Card</strong></span>
-          <i aria-hidden="true">→</i>
-        </a>
-        <a class="home-digital-tile" href="digital.html">
-          <span class="home-digital-media home-digital-media-recharge"><b>RE</b></span>
-          <span class="home-digital-tile-copy"><small>Recharge</small><strong>Crédit mobile</strong></span>
-          <i aria-hidden="true">→</i>
-        </a>
+      <div class="home-digital-showcase" data-home-digital-showcase aria-label="Sélection de produits digitaux">
+        <div class="catalog-empty"><strong>Chargement de la sélection</strong><p>Récupération des produits disponibles…</p></div>
       </div>
     </section>
 
     <section class="home-trust section" data-reveal>
-      <div class="section-heading"><div><p class="eyebrow">Pourquoi Nebula</p><h2>Une expérience conçue pour inspirer confiance</h2></div></div>
+      <div class="section-heading"><div><p class="eyebrow">Pourquoi SILVERSE</p><h2>Une expérience conçue pour inspirer confiance</h2></div></div>
       <div class="benefit-grid">
         <article><span>01</span><h3>Paiement sécurisé</h3><p>Des transactions protégées et une confirmation immédiate à chaque commande.</p></article>
         <article><span>02</span><h3>Livraison adaptée</h3><p>Suivi pour les produits physiques et réception instantanée pour le digital.</p></article>
@@ -279,7 +238,7 @@ if (currentPage === "index.html") {
     </section>
 
     <section class="home-reviews section" data-reveal>
-      <div class="section-heading"><div><p class="eyebrow">Avis clients</p><h2>Ils choisissent Nebula Market</h2></div></div>
+      <div class="section-heading"><div><p class="eyebrow">Avis clients</p><h2>Ils choisissent SILVERSE SHOP</h2></div></div>
       <div class="review-grid">
         <article><strong>“Simple et très rapide.”</strong><p>Ma recharge a été livrée immédiatement et le parcours était parfaitement clair.</p><span>★★★★★ · Afi K.</span></article>
         <article><strong>“Une boutique vraiment complète.”</strong><p>J’ai trouvé mon casque et une carte cadeau au même endroit, sans confusion.</p><span>★★★★★ · Daniel M.</span></article>
@@ -305,11 +264,15 @@ if (!document.querySelector("[data-search-panel]")) {
 const sharedFooter = `
   <div class="footer-top">
     <div class="footer-about">
-      <a class="brand footer-brand" href="index.html" aria-label="Nebula Market accueil">
-        <span class="brand-mark">N</span>
-        <span>Nebula Market</span>
+      <a class="brand footer-brand" href="index.html" aria-label="SILVERSE SHOP accueil">
+        <span class="brand-mark">S</span>
+        <span>SILVERSE SHOP</span>
       </a>
       <p>Marketplace premium pour acheter des produits physiques, des produits digitaux et des recharges avec une expérience claire et sécurisée.</p>
+      <div class="footer-contact" aria-label="Coordonnées du support">
+        <a href="mailto:Amegafranck7@gmail.com">Amegafranck7@gmail.com</a>
+        <a href="tel:+22890572457">+228 90 57 24 57</a>
+      </div>
       <div class="footer-proof">
         <span>✓ Paiement sécurisé</span>
         <span>✓ Livraison suivie</span>
@@ -341,7 +304,7 @@ const sharedFooter = `
     </nav>
   </div>
   <div class="footer-bottom">
-    <p>© 2026 Nebula Market. Tous droits réservés.</p>
+    <p>© 2026 SILVERSE SHOP. Tous droits réservés.</p>
     <p>Une plateforme unique pour vos achats physiques et digitaux.</p>
   </div>
 `;
@@ -376,7 +339,7 @@ const cartPageList = document.querySelector("[data-cart-page-list]");
 const cartPageSummaries = document.querySelectorAll("[data-cart-summary]");
 const favoritesPageList = document.querySelector("[data-favorites-page-list]");
 const catalogGrid = document.querySelector("[data-catalog-grid]");
-const catalogProducts = [...document.querySelectorAll("[data-catalog-product]")];
+let catalogProducts = [...document.querySelectorAll("[data-catalog-product]")];
 const catalogFilters = document.querySelector("[data-catalog-filters]");
 const catalogSkeleton = document.querySelector("[data-catalog-skeleton]");
 const catalogEmpty = document.querySelector("[data-catalog-empty]");
@@ -393,10 +356,41 @@ const digitalGroups = [...document.querySelectorAll("[data-digital-group]")];
 const digitalEmpty = document.querySelector("[data-digital-empty]");
 const digitalEditorialRow = document.querySelector(".digital-editorial-row");
 const gamingSearch = document.querySelector("[data-gaming-search]");
-const gamingSearchItems = [...document.querySelectorAll(".gaming-categories a, .gaming-products > article")];
+let gamingSearchItems = [];
+const gamingLoadMore = document.querySelector("[data-gaming-load-more]");
+const digitalCatalogGrid = document.querySelector("[data-digital-catalog-grid]");
+const digitalCatalogCount = document.querySelector("[data-digital-catalog-count]");
+const digitalCatalogLoadMore = document.querySelector("[data-digital-catalog-load-more]");
+const digitalGiftSearch = document.querySelector("[data-digital-gift-search]");
+let gamingProducts = [];
+let gamingTotal = 0;
+let gamingQuery = "";
+let gamingSearchTimer;
+let gamingLoading = false;
+let giftCardProducts = [];
+let giftCardTotal = 0;
+let giftCardQuery = "";
+let giftCardSearchTimer;
+let giftCardLoading = false;
 const mobileMenu = document.querySelector("[data-mobile-menu]");
 const openMobileMenuButton = document.querySelector("[data-open-mobile-menu]");
 const closeMobileMenuButtons = document.querySelectorAll("[data-close-mobile-menu]");
+const orderStatusForm = document.querySelector("[data-order-status-form]");
+const orderStatusResult = document.querySelector("[data-order-status-result]");
+const trackingForm = document.querySelector("[data-tracking-form]");
+const trackingResult = document.querySelector("[data-tracking-result]");
+const orderConfirmation = document.querySelector("[data-order-confirmation]");
+const playerLookupButton = document.querySelector("[data-player-lookup]");
+const playerLookupResult = document.querySelector("[data-player-lookup-result]");
+const checkoutForm = document.querySelector("[data-checkout-form]");
+const physicalDeliveryBlock = document.querySelector("[data-physical-delivery]");
+const digitalCheckoutFields = document.querySelector("[data-digital-checkout-fields]");
+const deliveryAddressFields = document.querySelector("[data-delivery-address-fields]");
+const deliveryLocationBox = document.querySelector("[data-delivery-location-box]");
+const deliveryLaterNote = document.querySelector("[data-delivery-later-note]");
+const useCurrentLocationButton = document.querySelector("[data-use-current-location]");
+const locationStatus = document.querySelector("[data-location-status]");
+const checkoutPayButton = document.querySelector("[data-checkout-submit]");
 
 let count = 0;
 let toastTimer;
@@ -409,225 +403,278 @@ let catalogLimit = 8;
 let catalogQuery = "";
 let catalogTimer;
 let digitalCategory = "all";
+let customerSession = null;
 
-const productCatalog = {
-  "free-fire-diamonds": {
-    id: "free-fire-diamonds",
-    name: "Diamants Free Fire",
-    brand: "Nebula Gaming",
-    price: "À partir de 520 FCFA",
-    media: "media-blue",
-    category: "Jeux",
-    availability: "Disponible",
-    short: "Diamants Free Fire livrés rapidement après validation.",
-    description: "Rechargez votre compte Free Fire avec un parcours sécurisé et une livraison digitale rapide après confirmation du paiement.",
-    details: ["Recharge gaming", "Livraison digitale", "Paiement sécurisé", "Support disponible"]
-  },
-  "pubg-uc": {
-    id: "pubg-uc",
-    name: "UC PUBG Mobile",
-    brand: "Nebula Gaming",
-    price: "À partir de 1 200 FCFA",
-    media: "media-blue",
-    category: "Jeux",
-    availability: "Disponible",
-    short: "Packs UC PUBG Mobile disponibles selon vos besoins.",
-    description: "Choisissez votre montant UC PUBG Mobile et suivez une commande claire jusqu'à la livraison digitale.",
-    details: ["UC PUBG Mobile", "Options flexibles", "Validation rapide", "Assistance client"]
-  },
-  "cod-mobile-cp": {
-    id: "cod-mobile-cp",
-    name: "CP Call of Duty Mobile",
-    brand: "Nebula Gaming",
-    price: "À partir de 1 000 FCFA",
-    media: "media-blue",
-    category: "Jeux",
-    availability: "Disponible",
-    short: "Crédits CP pour Call of Duty Mobile avec traitement rapide.",
-    description: "Achetez vos CP Call of Duty Mobile sur une fiche claire, avec paiement sécurisé et suivi de commande.",
-    details: ["CP mobile", "Traitement rapide", "Paiement sécurisé", "Support disponible"]
-  },
-  "headphones-studio": {
-    id: "headphones-studio",
-    name: "Casque audio Studio Pro",
-    brand: "Novatech",
-    price: "34 900 FCFA",
-    oldPrice: "42 500",
-    media: "sheet-headphones",
-    category: "Électronique",
-    availability: "Disponible",
-    short: "Son immersif, réduction de bruit et confort longue durée.",
-    description: "Un casque premium pensé pour le travail, les appels et les moments de détente. Sa conception enveloppante améliore l'isolation, tandis que la batterie longue durée accompagne les journées chargées.",
-    details: ["Bluetooth stable", "Coussinets confort", "Micro intégré", "Garantie boutique"]
-  },
-  "smartwatch-active": {
-    id: "smartwatch-active",
-    name: "Montre connectée Active",
-    brand: "Novatech",
-    price: "42 000 FCFA",
-    media: "sheet-watch",
-    category: "Électronique",
-    availability: "Disponible",
-    short: "Suivi quotidien, notifications et design compact.",
-    description: "Une montre connectée élégante pour suivre vos activités, recevoir vos notifications et garder l'essentiel à portée de poignet.",
-    details: ["Suivi activité", "Notifications mobile", "Bracelet confortable", "Autonomie optimisée"]
-  },
-  "urban-backpack": {
-    id: "urban-backpack",
-    name: "Sac urbain premium",
-    brand: "Atelier",
-    price: "31 500 FCFA",
-    oldPrice: "35 900",
-    media: "sheet-bag",
-    category: "Mode",
-    availability: "Disponible",
-    short: "Compartiments pratiques et finition résistante.",
-    description: "Un sac structuré pour les déplacements quotidiens, avec un espace organisé pour ordinateur, accessoires et essentiels personnels.",
-    details: ["Poche ordinateur", "Tissu résistant", "Bretelles ajustables", "Format urbain"]
-  },
-  "minimal-sneakers": {
-    id: "minimal-sneakers",
-    name: "Sneakers minimalistes",
-    brand: "Atelier",
-    price: "28 900 FCFA",
-    media: "sheet-shoes",
-    category: "Mode",
-    availability: "Disponible",
-    short: "Silhouette sobre, légère et facile à porter.",
-    description: "Des sneakers polyvalentes avec une ligne épurée et une semelle confortable pour accompagner les journées actives.",
-    details: ["Semelle souple", "Style minimal", "Usage quotidien", "Tailles variées"]
-  },
-  "halo-lamp": {
-    id: "halo-lamp",
-    name: "Lampe de table Halo",
-    brand: "PureHome",
-    price: "18 500 FCFA",
-    oldPrice: "23 000",
-    media: "sheet-lamp",
-    category: "Maison",
-    availability: "Disponible",
-    short: "Éclairage doux pour bureau, chambre ou salon.",
-    description: "Une lampe décorative au rendu chaleureux, idéale pour créer une ambiance soignée sans encombrer l'espace.",
-    details: ["Lumière douce", "Format compact", "Design moderne", "Faible consommation"]
-  },
-  "air-purifier": {
-    id: "air-purifier",
-    name: "Purificateur d’air Compact",
-    brand: "PureHome",
-    price: "39 900 FCFA",
-    media: "sheet-purifier",
-    category: "Maison",
-    availability: "Disponible",
-    short: "Format discret pour améliorer le confort intérieur.",
-    description: "Un purificateur compact conçu pour les pièces de vie, avec une utilisation simple et un design qui s'intègre facilement.",
-    details: ["Filtration pratique", "Mode silencieux", "Entretien simple", "Design compact"]
-  },
-  "serum-glow": {
-    id: "serum-glow",
-    name: "Sérum visage Glow",
-    brand: "Vita",
-    price: "14 900 FCFA",
-    oldPrice: "17 500",
-    media: "sheet-serum",
-    category: "Beauté",
-    availability: "Disponible",
-    short: "Soin léger pour une routine visage lumineuse.",
-    description: "Un sérum agréable à appliquer, pensé pour compléter une routine quotidienne avec une texture légère et un fini confortable.",
-    details: ["Texture légère", "Routine quotidienne", "Fini confortable", "Format pratique"]
-  },
-  "steel-bottle": {
-    id: "steel-bottle",
-    name: "Gourde isotherme Inox",
-    brand: "Vita",
-    price: "9 900 FCFA",
-    media: "sheet-bottle",
-    category: "Sport",
-    availability: "Disponible",
-    short: "Hydratation fiable au bureau, en sport ou en déplacement.",
-    description: "Une gourde robuste et facile à transporter, conçue pour garder vos boissons à portée de main tout au long de la journée.",
-    details: ["Acier inox", "Bouchon sécurisé", "Transport facile", "Usage quotidien"]
-  },
-  "headphones-lite": {
-    id: "headphones-lite",
-    name: "Casque sans fil Lite",
-    brand: "Novatech",
-    price: "27 900 FCFA",
-    oldPrice: "31 000",
-    media: "sheet-headphones",
-    category: "Électronique",
-    availability: "Disponible",
-    short: "Casque léger pour appels, musique et mobilité.",
-    description: "Une option sans fil accessible avec un son clair, une bonne autonomie et une prise en main rapide.",
-    details: ["Connexion rapide", "Design léger", "Micro intégré", "Commandes simples"]
-  },
-  "city-backpack": {
-    id: "city-backpack",
-    name: "Sac à dos City",
-    brand: "Atelier",
-    price: "24 500 FCFA",
-    media: "sheet-bag",
-    category: "Mode",
-    availability: "Indisponible",
-    short: "Sac polyvalent pour les trajets quotidiens.",
-    description: "Un sac compact et fonctionnel pour organiser facilement vos essentiels de journée.",
-    details: ["Format léger", "Poche frontale", "Bretelles réglables", "Retour en stock prochainement"]
-  },
-  "desk-lamp": {
-    id: "desk-lamp",
-    name: "Lampe d’appoint Mini",
-    brand: "PureHome",
-    price: "12 500 FCFA",
-    media: "sheet-lamp",
-    category: "Maison",
-    availability: "Disponible",
-    short: "Petite lampe pratique pour bureau ou chevet.",
-    description: "Une lampe d'appoint discrète qui apporte une lumière agréable aux petits espaces.",
-    details: ["Format mini", "Lumière confortable", "Installation simple", "Design sobre"]
-  },
-  "serum-duo": {
-    id: "serum-duo",
-    name: "Duo sérums essentiels",
-    brand: "Vita",
-    price: "18 900 FCFA",
-    oldPrice: "24 000",
-    media: "sheet-serum",
-    category: "Beauté",
-    availability: "Disponible",
-    short: "Deux soins complémentaires pour une routine complète.",
-    description: "Un duo de sérums pour construire une routine visage simple, efficace et agréable au quotidien.",
-    details: ["Pack duo", "Routine complète", "Texture agréable", "Prix avantageux"]
+const productCatalog = {};
+
+const getCatalogProduct = (id) => productCatalog[id] || null;
+
+Object.keys(productCatalog).forEach((id) => delete productCatalog[id]);
+
+const slugify = (value) => String(value)
+  .toLowerCase()
+  .normalize("NFD")
+  .replace(/[\u0300-\u036f]/g, "")
+  .replace(/[^a-z0-9]+/g, "-")
+  .replace(/(^-|-$)/g, "");
+
+const formatMoney = (value, currency = "FCFA") => `${Number(value || 0).toLocaleString("fr-FR")} ${currency}`;
+const escapeHtml = (value = "") => String(value).replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[char]));
+
+const normalizeBackendProduct = (product) => {
+  const rawPrice = Number(product.price || 0);
+  const rawOldPrice = Number(product.oldPrice || 0);
+  const categorySlug = product.category || "autre";
+  return {
+    ...product,
+    rawPrice,
+    rawOldPrice: rawOldPrice || 0,
+    price: product.priceLabel || formatMoney(rawPrice, product.currency),
+    oldPrice: product.oldPriceLabel || (rawOldPrice ? formatMoney(rawOldPrice, product.currency) : ""),
+    shippingFee: Number(product.shippingFee || 0),
+    shippingFeeLabel: product.shippingFeeLabel || formatMoney(product.shippingFee || 0, product.currency),
+    category: product.categoryLabel || categorySlug,
+    categorySlug,
+    availability: product.availability || (Number(product.stock || 0) > 0 ? "Disponible" : "Indisponible"),
+    media: product.media || "media-blue",
+    photo: product.photo || "",
+    type: product.type || "physical"
+  };
+};
+
+const productCardTemplate = (product) => {
+  const brandSlug = slugify(product.brand || "silverse-shop");
+  const isPromo = Boolean(product.oldPrice || product.badge?.includes("%"));
+  const isAvailable = product.availability !== "Indisponible" && Number(product.stock || 0) !== 0;
+  const id = encodeURIComponent(product.id);
+  const hasVariations = Array.isArray(product.variations) && product.variations.length > 0;
+  return `
+    <article class="market-product-card shop-product-card" role="link" tabindex="0" data-product-link="product.html?id=${id}" data-catalog-product data-category="${escapeHtml(product.categorySlug)}" data-brand="${brandSlug}" data-price="${product.rawPrice}" data-rating="${Number(product.rating || 0)}" data-promo="${isPromo}" data-stock="${isAvailable}" data-product-id="${escapeHtml(product.id)}" data-product-name="${escapeHtml(product.name)}" data-product-price="${escapeHtml(product.price)}" data-product-media="${escapeHtml(product.media)}" data-product-photo="${escapeHtml(product.photo || "")}">
+      ${renderProductImage(product)}
+      <button class="favorite-toggle" type="button" aria-label="Ajouter aux favoris" data-favorite-product>♡</button>
+      <p class="market-brand">SILVERSE SHOP</p>
+      <h3>${escapeHtml(product.name)}</h3>
+      <p class="market-product-description">${escapeHtml(product.short)}</p>
+      <p class="market-availability ${isAvailable ? "is-available" : "is-unavailable"}">${escapeHtml(product.availability)}</p>
+      <div class="market-rating">★★★★★ <span>${String(product.rating || 0).replace(".", ",")} · ${product.reviews || 0}</span></div>
+      <div class="market-price"><strong>${hasVariations ? "Dès " : ""}${escapeHtml(product.price)}</strong>${product.oldPrice ? `<del>${escapeHtml(product.oldPrice)}</del>` : ""}</div>
+    </article>
+  `;
+};
+
+const renderHomeApiProducts = (products) => {
+  const grid = document.querySelector("[data-home-catalog-grid]");
+  if (!grid) return;
+  const apiProducts = products.filter((product) => product.type === "digital").slice(0, 5);
+
+  grid.innerHTML = apiProducts.length
+    ? apiProducts.map((product) => renderHomeProduct({
+      id: product.id,
+      name: product.name,
+      brand: "SILVERSE SHOP",
+      price: product.price,
+      oldPrice: product.oldPrice,
+      media: product.media,
+      photo: product.photo,
+      rating: String(product.rating || 4.7).replace(".", ","),
+      reviews: product.reviews || 0,
+      badge: product.badge || "Digital",
+      hasVariations: Array.isArray(product.variations) && product.variations.length > 0
+    })).join("")
+    : `<div class="catalog-empty"><strong>Aucun produit disponible</strong><p>Le catalogue sera actualisé prochainement.</p></div>`;
+};
+
+const renderHomeDigitalShowcase = (products) => {
+  const showcase = document.querySelector("[data-home-digital-showcase]");
+  if (!showcase) return;
+  const selection = [...products]
+    .filter((product) => product.categorySlug === "giftcards")
+    .sort((a, b) => Number(Boolean(b.photo)) - Number(Boolean(a.photo)))
+    .slice(0, 5);
+  if (!selection.length) {
+    showcase.innerHTML = `<div class="catalog-empty"><strong>Aucune carte disponible</strong><p>Le catalogue sera actualisé prochainement.</p></div>`;
+    return;
+  }
+  showcase.innerHTML = selection.map((product, index) => {
+    const initials = String(product.name || "SS").split(/\s+/).slice(0, 2).map((word) => word[0]).join("").toUpperCase();
+    return `<a class="home-digital-tile ${index === 0 ? "home-digital-featured" : ""}" href="product.html?id=${encodeURIComponent(product.id)}">
+      <span class="home-digital-media ${product.photo ? "has-home-digital-photo" : "home-digital-fallback"}">${product.photo ? `<img src="${escapeHtml(product.photo)}" alt="${escapeHtml(product.name)}" loading="lazy" decoding="async">` : `<b>${escapeHtml(initials)}</b>`}</span>
+      <span class="home-digital-tile-copy"><small>Carte cadeau</small><strong>${escapeHtml(product.name)}</strong><em>Dès ${escapeHtml(product.price)}</em></span>
+      <i aria-hidden="true">→</i>
+    </a>`;
+  }).join("");
+};
+
+const renderGamingProducts = (products, total = products.length) => {
+  const apiProducts = products.filter((product) => product.categorySlug === "jeux");
+  const gamingGrid = document.querySelector("[data-gaming-catalog]");
+  const homeGrid = document.querySelector("[data-home-gaming-grid]");
+  const count = document.querySelector("[data-gaming-count]");
+  if (count) count.textContent = `${total} produit${total > 1 ? "s" : ""}`;
+  if (gamingGrid) {
+    gamingGrid.innerHTML = apiProducts.length
+      ? apiProducts.map(productCardTemplate).join("")
+      : `<div class="catalog-empty"><strong>Catalogue en attente</strong><p>Aucune recharge n’est disponible actuellement.</p></div>`;
+    gamingSearchItems = [...gamingGrid.querySelectorAll("[data-product-id]")];
+  }
+  if (gamingLoadMore) {
+    gamingLoadMore.hidden = apiProducts.length >= total;
+    gamingLoadMore.disabled = gamingLoading;
+    gamingLoadMore.textContent = gamingLoading ? "Chargement…" : "Charger plus de produits";
+  }
+  if (homeGrid) {
+    homeGrid.innerHTML = apiProducts.length
+      ? apiProducts.slice(0, 3).map((product, index) => `<a class="home-game-card ${index === 0 ? "home-game-featured" : ""}" href="product.html?id=${product.id}"><span>${product.name}</span><p>${product.short}</p><i>Découvrir →</i></a>`).join("")
+      : `<div class="catalog-empty"><strong>Catalogue en attente</strong><p>Les jeux disponibles vont apparaître ici.</p></div>`;
   }
 };
 
-const getCatalogProduct = (id) => productCatalog[id] || null;
+const refreshGlobalSearchItems = () => {
+  globalSearchItems = [
+    { title: "Accueil", meta: "Vue d'ensemble", href: "index.html" },
+    { title: "Boutique physique", meta: "Produits, accessoires et équipements", href: "boutique.html#catalogue" },
+    { title: "Produits digitaux", meta: "Cartes cadeaux, abonnements et recharges", href: "digital.html#catalogue" },
+    { title: "Jeux", meta: "Recharges et contenus gaming", href: "gaming.html" },
+    { title: "Électronique", meta: "Catégorie physique · audio, mobile et tech", href: "boutique.html#catalogue" },
+    { title: "Mode", meta: "Catégorie physique · sacs, chaussures et accessoires", href: "boutique.html#catalogue" },
+    { title: "Maison", meta: "Catégorie physique · décoration et confort", href: "boutique.html#catalogue" },
+    { title: "Beauté", meta: "Catégorie physique · soins et essentiels", href: "boutique.html#catalogue" },
+    { title: "Sport", meta: "Catégorie physique · fitness et outdoor", href: "boutique.html#catalogue" },
+    { title: "Cartes cadeaux", meta: "Produits digitaux disponibles immédiatement", href: "digital.html#catalogue" },
+    { title: "Recharges gaming", meta: "Livraison digitale sécurisée", href: "gaming.html#catalogue" },
+    { title: "Crédits de jeux", meta: "Jeux et contenus disponibles en ligne", href: "gaming.html" },
+    { title: "Mes favoris", meta: "Produits enregistrés", href: "favorites.html" },
+    { title: "Panier", meta: "Commande en cours", href: "cart.html" },
+    { title: "Compte", meta: "Connexion et création de compte", href: "contact.html" },
+    ...Object.values(productCatalog).map((product) => ({
+      title: product.name,
+      meta: `${product.category} · ${product.price}`,
+      href: `product.html?id=${product.id}`
+    }))
+  ];
+};
+
+const addProductsToCatalog = (products) => {
+  products.forEach((product) => {
+    productCatalog[product.id] = product;
+  });
+  refreshGlobalSearchItems();
+};
+
+const fetchProductPage = async ({ type = "", provider = "", category = "", query = "", limit = 60, offset = 0 } = {}) => {
+  const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
+  if (type) params.set("type", type);
+  if (provider) params.set("provider", provider);
+  if (category) params.set("category", category);
+  if (query) params.set("q", query);
+  const response = await fetch(`/api/products?${params}`);
+  if (!response.ok) throw new Error("Impossible de charger les produits.");
+  const data = await response.json();
+  return { ...data, products: (data.products || []).map(normalizeBackendProduct) };
+};
+
+const loadGamingProducts = async ({ reset = false, query = gamingQuery } = {}) => {
+  if (gamingLoading) return;
+  gamingLoading = true;
+  gamingQuery = query;
+  if (reset) gamingProducts = [];
+  renderGamingProducts(gamingProducts, gamingTotal);
+  try {
+    const data = await fetchProductPage({ type: "digital", category: "jeux", query, limit: 48, offset: gamingProducts.length });
+    gamingTotal = data.total || 0;
+    const known = new Set(gamingProducts.map((product) => product.id));
+    gamingProducts = [...gamingProducts, ...data.products.filter((product) => !known.has(product.id))];
+    addProductsToCatalog(data.products);
+  } finally {
+    gamingLoading = false;
+    renderGamingProducts(gamingProducts, gamingTotal);
+    enhanceCatalogCards();
+    syncFavoriteButtons();
+  }
+};
+
+const renderGiftCardProducts = () => {
+  if (!digitalCatalogGrid) return;
+  digitalCatalogGrid.innerHTML = giftCardProducts.length
+    ? giftCardProducts.map(productCardTemplate).join("")
+    : `<div class="catalog-empty"><strong>Aucune carte cadeau trouvée</strong><p>Essayez une autre recherche.</p></div>`;
+  if (digitalCatalogCount) digitalCatalogCount.textContent = `${giftCardTotal} carte${giftCardTotal > 1 ? "s" : ""}`;
+  if (digitalCatalogLoadMore) {
+    digitalCatalogLoadMore.hidden = giftCardProducts.length >= giftCardTotal;
+    digitalCatalogLoadMore.disabled = giftCardLoading;
+    digitalCatalogLoadMore.textContent = giftCardLoading ? "Chargement…" : "Charger plus de cartes";
+  }
+  syncFavoriteButtons();
+};
+
+const loadGiftCardProducts = async ({ reset = false, query = giftCardQuery } = {}) => {
+  if (giftCardLoading) return;
+  giftCardLoading = true;
+  giftCardQuery = query;
+  if (reset) giftCardProducts = [];
+  renderGiftCardProducts();
+  try {
+    const data = await fetchProductPage({ type: "digital", category: "giftcards", query, limit: 48, offset: giftCardProducts.length });
+    giftCardTotal = data.total || 0;
+    const known = new Set(giftCardProducts.map((product) => product.id));
+    giftCardProducts = [...giftCardProducts, ...data.products.filter((product) => !known.has(product.id))];
+    addProductsToCatalog(data.products);
+  } finally {
+    giftCardLoading = false;
+    renderGiftCardProducts();
+  }
+};
+
+const loadBackendProducts = async () => {
+  if (currentPage === "gaming.html") {
+    await loadGamingProducts({ reset: true, query: "" });
+    return;
+  }
+  if (currentPage === "digital.html") {
+    await loadGiftCardProducts({ reset: true, query: "" });
+    return;
+  }
+  if (currentPage === "index.html") {
+    const [giftCards, directRecharges] = await Promise.all([
+      fetchProductPage({ type: "digital", category: "giftcards", limit: 24 }),
+      fetchProductPage({ type: "digital", category: "jeux", limit: 6 })
+    ]);
+    const homeProducts = [...giftCards.products, ...directRecharges.products];
+    addProductsToCatalog(homeProducts);
+    renderHomeApiProducts(homeProducts);
+    renderHomeDigitalShowcase(giftCards.products);
+    renderGamingProducts(directRecharges.products, directRecharges.total || directRecharges.products.length);
+    return;
+  }
+
+  const type = ["boutique.html", "categories.html"].includes(currentPage) ? "physical" : "";
+  const page = await fetchProductPage({ type, limit: 60 });
+  const backendProducts = page.products;
+  addProductsToCatalog(backendProducts);
+
+  if (currentPage === "product.html" && currentProductId && !productCatalog[currentProductId]) {
+    const detailResponse = await fetch(`/api/products/${encodeURIComponent(currentProductId)}`);
+    if (detailResponse.ok) {
+      const detail = await detailResponse.json();
+      addProductsToCatalog([normalizeBackendProduct(detail.product)]);
+    }
+  }
+  renderHomeApiProducts(backendProducts);
+
+  if (catalogGrid) {
+    const physicalProducts = backendProducts.filter((product) => product.type !== "digital");
+    catalogGrid.innerHTML = physicalProducts.map(productCardTemplate).join("");
+    catalogProducts = [...catalogGrid.querySelectorAll("[data-catalog-product]")];
+  }
+};
 
 const normalizeProduct = (product) => {
   const full = getCatalogProduct(product.id) || {};
   return { ...full, ...product };
 };
 
-const globalSearchItems = [
-  { title: "Accueil", meta: "Vue d'ensemble", href: "index.html" },
-  { title: "Boutique physique", meta: "Produits, accessoires et équipements", href: "boutique.html#catalogue" },
-  { title: "Produits digitaux", meta: "Cartes cadeaux, abonnements et recharges", href: "digital.html#catalogue" },
-  { title: "Jeux", meta: "Recharges et contenus gaming", href: "gaming.html" },
-  { title: "Électronique", meta: "Catégorie physique · audio, mobile et tech", href: "boutique.html#catalogue" },
-  { title: "Mode", meta: "Catégorie physique · sacs, chaussures et accessoires", href: "boutique.html#catalogue" },
-  { title: "Maison", meta: "Catégorie physique · décoration et confort", href: "boutique.html#catalogue" },
-  { title: "Beauté", meta: "Catégorie physique · soins et essentiels", href: "boutique.html#catalogue" },
-  { title: "Sport", meta: "Catégorie physique · fitness et outdoor", href: "boutique.html#catalogue" },
-  { title: "Cartes cadeaux", meta: "Produits digitaux · Google Play, Apple Gift Card", href: "digital.html#catalogue" },
-  { title: "Abonnements", meta: "Produits digitaux · Netflix, Spotify et services", href: "digital.html#catalogue" },
-  { title: "Recharges gaming", meta: "Jeux · Free Fire, PUBG Mobile, Call of Duty", href: "gaming.html" },
-  { title: "Mes favoris", meta: "Produits enregistrés", href: "favorites.html" },
-  { title: "Panier", meta: "Commande en cours", href: "cart.html" },
-  { title: "Compte", meta: "Connexion et création de compte", href: "contact.html" },
-  ...Object.values(productCatalog).map((product) => ({
-    title: product.name,
-    meta: `${product.category} · ${product.price}`,
-    href: `product.html?id=${product.id}`
-  }))
-];
+let globalSearchItems = [];
+refreshGlobalSearchItems();
 
 const renderGlobalSearch = () => {
   if (!globalSearchResults || !globalSearchInput) return;
@@ -751,12 +798,25 @@ if (gamingCarousel) {
 }
 
 gamingSearch?.addEventListener("input", () => {
-  const query = gamingSearch.value.trim().toLowerCase();
-  gamingSearchItems.forEach((item) => {
-    const haystack = item.textContent.toLowerCase();
-    const productName = item.dataset.productName?.toLowerCase() || "";
-    item.hidden = query.length > 0 && !haystack.includes(query) && !productName.includes(query);
-  });
+  window.clearTimeout(gamingSearchTimer);
+  gamingSearchTimer = window.setTimeout(() => {
+    void loadGamingProducts({ reset: true, query: gamingSearch.value.trim() }).catch(() => showToast("Recherche momentanément indisponible"));
+  }, 300);
+});
+
+gamingLoadMore?.addEventListener("click", () => {
+  void loadGamingProducts().catch(() => showToast("Chargement momentanément indisponible"));
+});
+
+digitalGiftSearch?.addEventListener("input", () => {
+  window.clearTimeout(giftCardSearchTimer);
+  giftCardSearchTimer = window.setTimeout(() => {
+    void loadGiftCardProducts({ reset: true, query: digitalGiftSearch.value.trim() }).catch(() => showToast("Recherche momentanément indisponible"));
+  }, 300);
+});
+
+digitalCatalogLoadMore?.addEventListener("click", () => {
+  void loadGiftCardProducts().catch(() => showToast("Chargement momentanément indisponible"));
 });
 
 const getCatalogMatches = () => {
@@ -1028,24 +1088,105 @@ const countObserver = new IntersectionObserver(
 counters.forEach((counter) => countObserver.observe(counter));
 
 const saveFavorites = () => {
-  localStorage.setItem("nebula:favorites", JSON.stringify(favorites));
+  localStorage.setItem("silverse:favorites", JSON.stringify(favorites));
 };
 
 const saveCart = () => {
-  localStorage.setItem("nebula:cart", JSON.stringify(cart));
+  localStorage.setItem("silverse:cart", JSON.stringify(cart));
 };
 
 const loadCart = () => {
   try {
-    cart = JSON.parse(localStorage.getItem("nebula:cart") || "[]");
+    cart = JSON.parse(localStorage.getItem("silverse:cart") || "[]");
   } catch {
     cart = [];
   }
 };
 
+const inferGameRegion = (name = "") => {
+  const normalized = String(name).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+  const explicit = normalized.match(/\(([^)]+)\)/)?.[1]?.trim();
+  if (explicit) return explicit.replace(/\s*\/\s*/g, "/");
+  const aliases = ["GLOBAL", "EUROPE", "THAILAND", "SINGAPORE", "SAUDI ARABIA", "INDONESIA", "HONG KONG", "BRAZIL", "SOUTH AFRICA", "AUSTRALIA", "MALAYSIA", "MENA", "LATAM", "CIS", "EU", "VN", "TW", "PH", "SG", "TH", "ID", "BR", "BD"];
+  return aliases.find((alias) => normalized.includes(alias)) || "GLOBAL";
+};
+
+const findLookupValue = (payload, keys, depth = 0) => {
+  if (depth > 7 || payload == null || typeof payload !== "object") return "";
+  for (const [key, value] of Object.entries(payload)) {
+    if (keys.includes(key.toLowerCase()) && ["string", "number"].includes(typeof value) && String(value).trim()) return String(value).trim();
+  }
+  for (const value of Object.values(payload)) {
+    const match = findLookupValue(value, keys, depth + 1);
+    if (match) return match;
+  }
+  return "";
+};
+
+const refreshCheckoutDelivery = () => {
+  if (!checkoutForm) return;
+  const hasPhysical = cart.some((item) => item.type === "physical");
+  const hasDigital = cart.some((item) => item.type === "digital" || item.categorySlug === "jeux" || item.categorySlug === "giftcards");
+  const hasGame = cart.some((item) => item.categorySlug === "jeux");
+  const cartReady = cart.length > 0 && cart.every((item) => item.type === "physical" || item.type === "digital");
+  if (checkoutPayButton && !checkoutPayButton.dataset.submitting) {
+    checkoutPayButton.disabled = !cartReady;
+    checkoutPayButton.textContent = cartReady ? "Payer avec Money Fusion" : (cart.length ? "Vérification du panier…" : "Panier vide");
+  }
+  if (physicalDeliveryBlock) physicalDeliveryBlock.hidden = !hasPhysical;
+  if (digitalCheckoutFields) digitalCheckoutFields.hidden = !hasGame;
+  const playerIdField = checkoutForm.querySelector('[name="playerId"]');
+  if (playerIdField) playerIdField.required = hasGame;
+  if (hasGame) {
+    const game = cart.find((item) => item.categorySlug === "jeux");
+    const regionField = checkoutForm.querySelector('[name="region"]');
+    if (regionField && !regionField.value) regionField.value = inferGameRegion(game?.name || "");
+  }
+  const digitalStep = document.querySelector("[data-checkout-step]");
+  const paymentStep = document.querySelector("[data-payment-step]");
+  if (digitalStep) digitalStep.textContent = hasPhysical ? "03" : "02";
+  if (paymentStep) paymentStep.textContent = hasPhysical && hasDigital ? "04" : "03";
+
+  const option = checkoutForm.querySelector('[name="deliveryOption"]:checked')?.value || "address_now";
+  if (deliveryAddressFields) deliveryAddressFields.hidden = !hasPhysical || option !== "address_now";
+  if (deliveryLocationBox) deliveryLocationBox.hidden = !hasPhysical || option !== "current_location";
+  if (deliveryLaterNote) deliveryLaterNote.hidden = !hasPhysical || option !== "communicate_later";
+};
+
+checkoutForm?.querySelectorAll('[name="deliveryOption"]').forEach((input) => {
+  input.addEventListener("change", refreshCheckoutDelivery);
+});
+
+useCurrentLocationButton?.addEventListener("click", () => {
+  if (!navigator.geolocation) {
+    if (locationStatus) locationStatus.textContent = "La géolocalisation n’est pas disponible sur cet appareil.";
+    return;
+  }
+  useCurrentLocationButton.disabled = true;
+  useCurrentLocationButton.textContent = "Localisation en cours…";
+  navigator.geolocation.getCurrentPosition((position) => {
+    const latitude = position.coords.latitude.toFixed(6);
+    const longitude = position.coords.longitude.toFixed(6);
+    checkoutForm.querySelector('[name="latitude"]').value = latitude;
+    checkoutForm.querySelector('[name="longitude"]').value = longitude;
+    if (locationStatus) locationStatus.textContent = `Position enregistrée avec une précision d’environ ${Math.round(position.coords.accuracy)} m.`;
+    useCurrentLocationButton.textContent = "✓ Position enregistrée";
+    useCurrentLocationButton.disabled = false;
+  }, (error) => {
+    const messages = {
+      1: "Autorisation refusée. Vous pouvez saisir une adresse ou la communiquer plus tard.",
+      2: "Position indisponible. Réessayez ou choisissez une autre option.",
+      3: "La localisation a pris trop de temps. Réessayez."
+    };
+    if (locationStatus) locationStatus.textContent = messages[error.code] || "Impossible de récupérer votre position.";
+    useCurrentLocationButton.textContent = "⌖ Réessayer la localisation";
+    useCurrentLocationButton.disabled = false;
+  }, { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 });
+});
+
 const loadFavorites = () => {
   try {
-    favorites = JSON.parse(localStorage.getItem("nebula:favorites") || "[]");
+    favorites = JSON.parse(localStorage.getItem("silverse:favorites") || "[]");
   } catch {
     favorites = [];
   }
@@ -1059,6 +1200,8 @@ const getProductFromElement = (element) => {
       name: card.dataset.productName,
       price: card.dataset.productPrice,
       media: card.dataset.productMedia,
+      photo: card.dataset.productPhoto,
+      variationId: card.dataset.productVariationId || "",
     });
   }
 
@@ -1102,25 +1245,18 @@ const renderProductDetail = () => {
   if (!detailRoot) return;
 
   const params = new URLSearchParams(window.location.search);
-  const requestedId = params.get("id") || "headphones-studio";
-  const fallbackName = requestedId
-    .split("-")
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ") || "Produit sélectionné";
-  const product = getCatalogProduct(requestedId) || {
-    id: requestedId,
-    name: fallbackName,
-    brand: "Nebula Market",
-    price: "Prix selon option",
-    media: "media-blue",
-    category: "Produit",
-    availability: "Disponible",
-    short: "Produit disponible selon les options du catalogue.",
-    description: "Cette fiche présente les informations principales du produit sélectionné. Les options, montants ou variantes peuvent être confirmés au moment de la commande.",
-    details: ["Paiement sécurisé", "Validation rapide", "Support disponible", "Options selon produit"]
-  };
-  const isDigitalProduct = product.category === "Produit" || digitalProductIds.includes(product.id) || gamingProductIds.includes(product.id);
+  const requestedId = params.get("id") || "";
+  const product = getCatalogProduct(requestedId);
+  if (!product) {
+    detailRoot.innerHTML = `<section class="page-panel catalog-empty"><strong>Ce produit n’est pas disponible</strong><p>Il ne fait pas partie du catalogue actuellement autorisé.</p><a class="primary-button" href="gaming.html">Voir les produits disponibles</a></section>`;
+    document.title = "Produit indisponible | SILVERSE SHOP";
+    return;
+  }
+  const variations = Array.isArray(product.variations) ? product.variations : [];
+  const initialVariation = variations[0] || null;
+  const initialPrice = initialVariation ? formatMoney(initialVariation.price, product.currency) : product.price;
+  const cartProductName = initialVariation ? `${product.name} — ${initialVariation.name}` : product.name;
+  const isDigitalProduct = product.type === "digital" || product.categorySlug === "jeux" || product.categorySlug === "giftcards";
   const productRef = `NB-${product.id.toUpperCase().replace(/[^A-Z0-9]+/g, "-").slice(0, 18)}`;
   const productType = isDigitalProduct ? "Produit numérique" : "Produit physique";
   const deliveryInfo = isDigitalProduct
@@ -1129,8 +1265,8 @@ const renderProductDetail = () => {
       items: ["Réception par e-mail ou espace compte après validation", "Instructions d'obtention envoyées avec la confirmation", "Support disponible en cas de difficulté d'activation"]
     }
     : {
-      title: "Livraison physique suivie",
-      items: ["Délai estimé communiqué lors de la commande", "Suivi de commande disponible dans le panier et le compte", "Préparation soigneuse avant expédition ou retrait"]
+      title: "Livraison physique sous 24 h",
+      items: ["Adresse saisie, position actuelle ou coordonnées communiquées plus tard", "Livraison sous 24 h après disponibilité du produit et confirmation de l’adresse", "Suivi de commande disponible dans votre espace client"]
     };
   const similar = Object.values(productCatalog)
     .filter((item) => item.id !== product.id && (item.category === product.category || product.category === "Produit"))
@@ -1140,7 +1276,7 @@ const renderProductDetail = () => {
     .slice(0, 4);
   let recentProducts = [];
   try {
-    recentProducts = JSON.parse(localStorage.getItem("nebula:recent-products") || "[]")
+    recentProducts = JSON.parse(localStorage.getItem("silverse:recent-products") || "[]")
       .filter((item) => item.id !== product.id)
       .slice(0, 4)
       .map(normalizeProduct);
@@ -1148,50 +1284,49 @@ const renderProductDetail = () => {
     recentProducts = [];
   }
   const recommendations = recentProducts.length ? recentProducts : fallbackRecommendations;
-  localStorage.setItem("nebula:recent-products", JSON.stringify([
-    { id: product.id, name: product.name, price: product.price, media: product.media },
+  localStorage.setItem("silverse:recent-products", JSON.stringify([
+    { id: product.id, name: product.name, price: product.price, media: product.media, photo: product.photo },
     ...recentProducts
   ].slice(0, 8)));
   const productCard = (item) => `
-    <article class="market-product-card shop-product-card product-reco-card" data-product-id="${item.id}" data-product-name="${item.name}" data-product-price="${item.price}" data-product-media="${item.media}">
-      <a class="market-product-image ${item.media}" href="product.html?id=${item.id}" aria-label="Voir ${item.name}"></a>
+    <article class="market-product-card shop-product-card product-reco-card" data-product-id="${item.id}" data-product-name="${item.name}" data-product-price="${item.price}" data-product-media="${item.media}" data-product-photo="${item.photo || ""}">
+      <a class="market-product-image ${item.photo ? "has-product-photo" : "product-image-placeholder"} ${escapeHtml(item.media)}" href="product.html?id=${encodeURIComponent(item.id)}" aria-label="Voir ${escapeHtml(item.name)}">${item.photo ? `<img src="${escapeHtml(item.photo)}" alt="${escapeHtml(item.name)}" loading="lazy">` : `<i aria-hidden="true">◇</i>`}</a>
       <button class="favorite-toggle" type="button" aria-label="Ajouter aux favoris" data-favorite-product>♡</button>
-      <p class="market-brand">${item.brand || "Nebula Market"}</p>
+      <p class="market-brand">SILVERSE SHOP</p>
       <h3>${item.name}</h3>
-      <p class="market-product-description">${item.short || "Produit recommandé par Nebula Market."}</p>
+      <p class="market-product-description">${item.short || "Produit recommandé par SILVERSE SHOP."}</p>
       <p class="market-availability ${item.availability === "Indisponible" ? "is-unavailable" : "is-available"}">${item.availability || "Disponible"}</p>
       <div class="market-price"><strong>${item.price}</strong></div>
       <div class="market-actions"><a href="product.html?id=${item.id}">Voir</a><button type="button" data-add-cart>Ajouter au panier</button></div>
     </article>
   `;
 
-  document.title = `${product.name} | Nebula Market`;
+  document.title = `${product.name} | SILVERSE SHOP`;
   detailRoot.innerHTML = `
-    <section class="product-detail-hero" data-product-id="${product.id}" data-product-name="${product.name}" data-product-price="${product.price}" data-product-media="${product.media}">
+    <section class="product-detail-hero" data-product-id="${escapeHtml(product.id)}" data-product-name="${escapeHtml(cartProductName)}" data-product-price="${escapeHtml(initialPrice)}" data-product-media="${escapeHtml(product.media)}" data-product-photo="${escapeHtml(product.photo || "")}" data-product-variation-id="${escapeHtml(initialVariation?.id || "")}">
       <div class="product-gallery">
-        <div class="product-gallery-main market-product-image ${product.media}" data-product-gallery-main role="img" aria-label="${product.name}"></div>
+        <div class="product-gallery-main market-product-image ${product.photo ? "has-product-photo" : "product-image-placeholder"} ${escapeHtml(product.media)}" data-product-gallery-main role="img" aria-label="${escapeHtml(product.name)}">${product.photo ? `<img src="${escapeHtml(product.photo)}" alt="${escapeHtml(product.name)}" decoding="async">` : `<i aria-hidden="true">◇</i>`}</div>
         <div class="product-gallery-thumbs" aria-label="Galerie produit">
-          <button class="is-active market-product-image ${product.media}" type="button" aria-label="Image principale" data-product-gallery-thumb="${product.media}"></button>
-          <button class="market-product-image ${product.media} product-gallery-variant product-gallery-variant-soft" type="button" aria-label="Vue détail" data-product-gallery-thumb="${product.media} product-gallery-variant product-gallery-variant-soft"></button>
-          <button class="market-product-image ${product.media} product-gallery-variant product-gallery-variant-dark" type="button" aria-label="Vue contexte" data-product-gallery-thumb="${product.media} product-gallery-variant product-gallery-variant-dark"></button>
+          <button class="is-active market-product-image ${product.photo ? "has-product-photo" : "product-image-placeholder"} ${escapeHtml(product.media)}" type="button" aria-label="Vue principale" data-product-gallery-thumb="${escapeHtml(product.media)}" data-product-gallery-photo="${escapeHtml(product.photo || "")}">${product.photo ? `<img src="${escapeHtml(product.photo)}" alt="">` : `<i aria-hidden="true">◇</i>`}</button>
         </div>
       </div>
       <article class="product-detail-info">
         <div class="product-detail-kicker"><span>${product.category}</span><em>${productRef}</em></div>
         <h1>${product.name}</h1>
-        <div class="product-detail-price"><strong>${product.price}</strong>${product.oldPrice ? `<del>${product.oldPrice}</del>` : ""}</div>
+        <div class="product-detail-price"><strong data-product-detail-price>${escapeHtml(initialPrice)}</strong>${product.oldPrice ? `<del>${escapeHtml(product.oldPrice)}</del>` : ""}</div>
         <div class="product-detail-status">
           <p class="market-availability ${product.availability === "Disponible" ? "is-available" : "is-unavailable"}">${product.availability}</p>
           <span>En stock</span>
         </div>
         <p class="product-detail-lead">${product.short || product.description}</p>
+        ${variations.length ? `<label class="product-variation-field">Choisissez une option<select data-product-variation>${variations.map((variation) => `<option value="${escapeHtml(variation.id)}" data-price="${Number(variation.price)}" data-name="${escapeHtml(variation.name)}">${escapeHtml(variation.name)} — ${escapeHtml(formatMoney(variation.price, product.currency))}</option>`).join("")}</select></label>` : ""}
         <div class="product-detail-actions" aria-label="Actions produit">
           <button class="product-buy-now" type="button" data-buy-now>Acheter maintenant</button>
           <button class="product-add-cart" type="button" data-add-cart>Ajouter au panier</button>
           <button class="product-detail-favorite" type="button" aria-label="Ajouter aux favoris" data-favorite-product><span>♡</span><strong>Favoris</strong></button>
         </div>
         <dl class="product-detail-meta">
-          <div><dt>Marque</dt><dd>${product.brand}</dd></div>
+        <div><dt>Marque</dt><dd>SILVERSE SHOP</dd></div>
           <div><dt>Catégorie</dt><dd>${product.category}</dd></div>
           <div><dt>Référence</dt><dd>${productRef}</dd></div>
           <div><dt>Type</dt><dd>${productType}</dd></div>
@@ -1218,14 +1353,14 @@ const renderProductDetail = () => {
           <div><dt>Type de produit</dt><dd>${productType}</dd></div>
           <div><dt>Conditions d'utilisation</dt><dd>${isDigitalProduct ? "Activation selon les instructions reçues" : "Usage conforme aux indications du produit"}</dd></div>
           <div><dt>Compatibilité</dt><dd>${isDigitalProduct ? "Selon compte, région ou service sélectionné" : "Usage quotidien et accessoires compatibles selon besoin"}</dd></div>
-          <div><dt>Assistance</dt><dd>Support Nebula Market disponible</dd></div>
+          <div><dt>Assistance</dt><dd>Support SILVERSE SHOP disponible</dd></div>
         </dl>
       </div>
     </section>
     <section class="product-detail-section">
       <div class="product-info-panels">
         <article class="page-panel"><p class="eyebrow">Caractéristiques</p><h2>Points clés</h2><ul class="product-detail-list">${product.details.map((detail) => `<li>${detail}</li>`).join("")}</ul></article>
-        <article class="page-panel"><p class="eyebrow">Pourquoi choisir ce produit</p><h2>Ce qui fait la différence</h2><ul class="product-detail-list"><li>Produit sélectionné par Nebula Market</li><li>Paiement sécurisé</li><li>Parcours d'achat clair</li><li>Assistance disponible</li></ul></article>
+        <article class="page-panel"><p class="eyebrow">Pourquoi choisir ce produit</p><h2>Ce qui fait la différence</h2><ul class="product-detail-list"><li>Produit sélectionné par SILVERSE SHOP</li><li>Paiement sécurisé</li><li>Parcours d'achat clair</li><li>Assistance disponible</li></ul></article>
       </div>
     </section>
     <section class="product-detail-section">
@@ -1244,6 +1379,20 @@ const renderProductDetail = () => {
       </div>
     </section>
   `;
+
+  const variationSelect = detailRoot.querySelector("[data-product-variation]");
+  variationSelect?.addEventListener("change", () => {
+    const option = variationSelect.selectedOptions[0];
+    const detailCard = detailRoot.querySelector("[data-product-id]");
+    const priceLabel = formatMoney(Number(option?.dataset.price || 0), product.currency);
+    if (detailCard) {
+      detailCard.dataset.productVariationId = variationSelect.value;
+      detailCard.dataset.productName = `${product.name} — ${option?.dataset.name || "Option"}`;
+      detailCard.dataset.productPrice = priceLabel;
+    }
+    const priceNode = detailRoot.querySelector("[data-product-detail-price]");
+    if (priceNode) priceNode.textContent = priceLabel;
+  });
 };
 
 const updateCartCount = () => {
@@ -1263,24 +1412,27 @@ const bumpCart = () => {
 };
 
 const addToCart = (product) => {
-  const existing = cart.find((item) => item.id === product.id);
+  const cartKey = `${product.id}:${product.variationId || "base"}`;
+  const existing = cart.find((item) => (item.cartKey || `${item.id}:${item.variationId || "base"}`) === cartKey);
   if (existing) {
     existing.qty = (existing.qty || 1) + 1;
   } else {
-    cart = [{ ...product, qty: 1 }, ...cart];
+    cart = [{ ...product, cartKey, qty: 1 }, ...cart];
   }
 
   saveCart();
   updateCartCount();
   renderCartPage();
   bumpCart();
+  void validateCartWithBackend();
 };
 
 const removeFromCart = (id) => {
-  cart = cart.filter((item) => item.id !== id);
+  cart = cart.filter((item) => (item.cartKey || item.id) !== id);
   saveCart();
   updateCartCount();
   renderCartPage();
+  void validateCartWithBackend();
 };
 
 const renderCompactItems = (items, emptyMessage, actionType = "cart") => {
@@ -1299,16 +1451,17 @@ const renderCompactItems = (items, emptyMessage, actionType = "cart") => {
   return items.map((rawItem) => {
     const item = normalizeProduct(rawItem);
     return `
-    <article class="page-list-item favorite-page-card" data-product-id="${item.id}" data-product-name="${item.name}" data-product-price="${item.price}" data-product-media="${item.media || ""}">
-      <span class="favorite-thumb ${item.media || ""}" aria-hidden="true"></span>
+    <article class="page-list-item favorite-page-card" data-product-id="${item.id}" data-product-name="${item.name}" data-product-price="${item.price}" data-product-media="${item.media || ""}" data-product-photo="${item.photo || ""}">
+      <span class="favorite-thumb ${item.photo ? "has-product-photo" : "product-image-placeholder"} ${escapeHtml(item.media || "")}">${item.photo ? `<img src="${escapeHtml(item.photo)}" alt="${escapeHtml(item.name)}" loading="lazy">` : `<i aria-hidden="true">◇</i>`}</span>
       <div>
         <strong>${item.name}</strong>
         <em>${item.price}</em>
         ${actionType === "favorite" && item.short ? `<small>${item.short}</small>` : ""}
         ${item.qty ? `<small>Quantité : ${item.qty}</small>` : ""}
+        ${actionType === "cart" && item.shippingFeeLabel ? `<small>Livraison : ${item.shippingFeeLabel}</small>` : ""}
       </div>
       ${actionType === "cart" ? `
-        <button type="button" data-cart-remove="${item.id}">Supprimer</button>
+        <button type="button" data-cart-remove="${item.cartKey || item.id}">Supprimer</button>
       ` : `
         <div class="favorite-page-actions">
           <a href="product.html?id=${item.id}">Voir</a>
@@ -1324,6 +1477,30 @@ const renderCompactItems = (items, emptyMessage, actionType = "cart") => {
 const renderCartPage = () => {
   if (!cartPageList) return;
   cartPageList.innerHTML = renderCompactItems(cart, "Votre panier est vide", "cart");
+};
+
+const validateCartWithBackend = async () => {
+  if (!cart.length) {
+    refreshCheckoutDelivery();
+    return;
+  }
+  try {
+    const response = await fetch("/api/cart/validate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ items: cart.map((item) => ({ id: item.id, variationId: item.variationId || "", qty: item.qty || 1 })) })
+    });
+    if (!response.ok) return;
+    const data = await response.json();
+    cart = data.items.map((item) => ({ ...normalizeBackendProduct(item), price: item.priceLabel || item.price, variationId: item.variationId || "", cartKey: `${item.id}:${item.variationId || "base"}`, qty: item.qty }));
+    saveCart();
+    updateCartCount();
+    renderCartPage();
+  } catch {
+    showToast("Le panier sera resynchronisé plus tard");
+  } finally {
+    refreshCheckoutDelivery();
+  }
 };
 
 const renderFavoritesPage = () => {
@@ -1462,18 +1639,34 @@ document.addEventListener("click", (event) => {
   }
 
   saveFavorites();
+  void syncFavoriteWithAccount(product.id, !exists);
   syncFavoriteButtons();
   renderFavoritesPage();
 });
 
-enhanceCatalogCards();
-renderProductDetail();
-loadFavorites();
-loadCart();
-syncFavoriteButtons();
-updateCartCount();
-renderCartPage();
-renderFavoritesPage();
+const initializeCommerce = async () => {
+  loadFavorites();
+  loadCart();
+  refreshCheckoutDelivery();
+
+  try {
+    await loadBackendProducts();
+  } catch {
+    refreshGlobalSearchItems();
+    showToast("Catalogue local chargé, API indisponible");
+  }
+
+  enhanceCatalogCards();
+  renderProductDetail();
+  syncFavoriteButtons();
+  updateCartCount();
+  renderCatalog();
+  renderCartPage();
+  renderFavoritesPage();
+  await validateCartWithBackend();
+};
+
+void initializeCommerce();
 
 cartPageList?.addEventListener("click", (event) => {
   const button = event.target.closest("[data-cart-remove]");
@@ -1489,6 +1682,7 @@ favoritesPageList?.addEventListener("click", (event) => {
   if (removeButton) {
     favorites = favorites.filter((item) => item.id !== removeButton.dataset.favoritePageRemove);
     saveFavorites();
+    void syncFavoriteWithAccount(removeButton.dataset.favoritePageRemove, false);
     syncFavoriteButtons();
     renderFavoritesPage();
     showToast("Produit retiré des favoris");
@@ -1511,6 +1705,9 @@ document.addEventListener("click", (event) => {
   if (!main) return;
   gallery.querySelectorAll("[data-product-gallery-thumb]").forEach((item) => item.classList.toggle("is-active", item === thumb));
   main.className = `product-gallery-main market-product-image ${thumb.dataset.productGalleryThumb}`;
+  const photo = thumb.dataset.productGalleryPhoto || "";
+  main.classList.add(photo ? "has-product-photo" : "product-image-placeholder");
+  main.innerHTML = photo ? `<img src="${escapeHtml(photo)}" alt="">` : '<i aria-hidden="true">◇</i>';
 });
 
 openSearchButtons.forEach((button) => {
@@ -1532,6 +1729,19 @@ closeSearchButtons.forEach((button) => {
 });
 
 globalSearchInput?.addEventListener("input", renderGlobalSearch);
+
+document.addEventListener("click", (event) => {
+  const card = event.target.closest("[data-product-link]");
+  if (!card || event.target.closest("button, a, input, select, textarea")) return;
+  window.location.href = card.dataset.productLink;
+});
+
+document.addEventListener("keydown", (event) => {
+  const card = event.target.closest("[data-product-link]");
+  if (!card || !["Enter", " "].includes(event.key)) return;
+  event.preventDefault();
+  window.location.href = card.dataset.productLink;
+});
 
 document.addEventListener("click", (event) => {
   const button = event.target.closest("[data-add-cart]");
@@ -1615,6 +1825,128 @@ const validateAccountForm = (form) => {
   return isValid;
 };
 
+const giftCardDeliveries = (order) => (order.items || [])
+  .filter((item) => item.category === "giftcards")
+  .flatMap((item) => (item.deliveryCodes || []).map((code) => ({ name: item.name, code })));
+
+const renderOrderTracking = (order) => {
+  const deliveries = giftCardDeliveries(order);
+  const waitingForGiftCode = order.payment?.status === "succeeded"
+    && (order.items || []).some((item) => item.category === "giftcards")
+    && deliveries.length === 0;
+  return `
+  <h2>${order.statusLabel}</h2>
+  <p><strong>${order.id}</strong> · ${order.trackingNumber}</p>
+  <p>Total : ${order.totalLabel}</p>
+  ${deliveries.length ? `<section class="digital-delivery-box"><p class="eyebrow">Livraison numérique</p><h3>Votre carte cadeau est disponible</h3><p>Copiez le code ci-dessous ou téléchargez-le pour le conserver.</p><div class="digital-code-list">${deliveries.map(({ name, code }) => `<article><span>${escapeHtml(name)}</span><code>${escapeHtml(code)}</code><button type="button" data-copy-digital-code="${escapeHtml(code)}">Copier</button></article>`).join("")}</div><button type="button" class="checkout-secondary-button" data-download-digital-codes>Télécharger mes codes</button></section>` : ""}
+  ${waitingForGiftCode ? `<section class="digital-delivery-box is-waiting"><h3>Paiement confirmé</h3><p>Votre code est en cours de récupération. Cette page s’actualise automatiquement.</p></section>` : ""}
+  <div class="catalog-load-more"><span>${order.trackingProgress}% du traitement</span></div>
+  <div class="page-list">
+    ${(order.timeline || []).map((event) => `
+      <article class="page-list-item">
+        <div>
+          <strong>${event.label}</strong>
+          <em>${new Date(event.createdAt).toLocaleString("fr-FR")}</em>
+          <small>${event.location || "SILVERSE SHOP"}</small>
+          <small>${event.note || "Mise à jour de commande"}</small>
+        </div>
+      </article>
+    `).join("")}
+  </div>
+`;
+};
+
+let trackingRefreshTimer;
+let trackingRefreshAttempts = 0;
+const scheduleGiftCardRefresh = (reference, order) => {
+  window.clearTimeout(trackingRefreshTimer);
+  const needsRefresh = order.payment?.status === "succeeded"
+    && (order.items || []).some((item) => item.category === "giftcards")
+    && giftCardDeliveries(order).length === 0;
+  if (!needsRefresh || trackingRefreshAttempts >= 24) return;
+  trackingRefreshTimer = window.setTimeout(async () => {
+    trackingRefreshAttempts += 1;
+    try {
+      const refreshedOrder = await fetchOrderTracking(reference);
+      if (trackingResult) trackingResult.innerHTML = renderOrderTracking(refreshedOrder);
+      scheduleGiftCardRefresh(reference, refreshedOrder);
+    } catch {
+      scheduleGiftCardRefresh(reference, order);
+    }
+  }, 5000);
+};
+
+const fetchOrderTracking = async (reference) => {
+  const response = await fetch(`/api/tracking/${encodeURIComponent(reference)}`);
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || "Commande introuvable");
+  return data.order;
+};
+
+const refreshCustomerSession = async () => {
+  try {
+    const response = await fetch("/api/auth/session", { credentials: "same-origin", headers: { "Accept": "application/json" } });
+    const data = await response.json();
+    customerSession = response.ok && data.authenticated ? data : null;
+  } catch {
+    customerSession = null;
+  }
+  return customerSession;
+};
+
+const customerSecurityHeaders = () => customerSession?.csrfToken ? { "X-CSRF-Token": customerSession.csrfToken } : {};
+
+const syncFavoriteWithAccount = async (productId, shouldExist) => {
+  if (!customerSession?.authenticated || !productId) return;
+  try {
+    await fetch(`/api/account/favorites/${encodeURIComponent(productId)}`, {
+      method: shouldExist ? "POST" : "DELETE",
+      credentials: "same-origin",
+      headers: { "Accept": "application/json", ...customerSecurityHeaders() }
+    });
+  } catch {
+    // Le favori reste disponible localement et sera resynchronisé plus tard.
+  }
+};
+
+const renderCustomerAccount = async () => {
+  const forms = document.querySelector("[data-account-forms]");
+  const sessionPanel = document.querySelector("[data-account-session]");
+  if (!forms || !sessionPanel) return;
+  forms.hidden = Boolean(customerSession?.authenticated);
+  sessionPanel.hidden = !customerSession?.authenticated;
+  if (!customerSession?.authenticated) return;
+  sessionPanel.querySelector("[data-account-name]").textContent = customerSession.account.fullName;
+  sessionPanel.querySelector("[data-account-email]").textContent = customerSession.account.email;
+  try {
+    const response = await fetch("/api/account/overview", { credentials: "same-origin", headers: { "Accept": "application/json" } });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "Compte indisponible");
+    const root = sessionPanel.querySelector("[data-account-orders]");
+    root.innerHTML = data.orders.length ? data.orders.map((order) => `
+      <a class="account-order" href="tracking.html?ref=${encodeURIComponent(order.trackingNumber)}">
+        <span><strong>${escapeHtml(order.id)}</strong><small>${new Date(order.createdAt).toLocaleDateString("fr-FR")}</small></span>
+        <span><b>${escapeHtml(order.totalLabel)}</b><small>${escapeHtml(order.statusLabel)}</small></span>
+      </a>
+    `).join("") : `<p class="account-empty">Aucune commande pour le moment.</p>`;
+    const remoteFavorites = data.favorites || [];
+    const localIds = new Set(favorites.map((item) => item.id));
+    remoteFavorites.forEach((item) => {
+      if (!localIds.has(item.id)) favorites.push(normalizeBackendProduct(item));
+    });
+    saveFavorites();
+    renderFavoritesPage();
+    await Promise.all(favorites.map((item) => syncFavoriteWithAccount(item.id, true)));
+  } catch (error) {
+    sessionPanel.querySelector("[data-account-orders]").innerHTML = `<p class="account-empty">${escapeHtml(error.message)}</p>`;
+  }
+};
+
+const initializeCustomerAccount = async () => {
+  await refreshCustomerSession();
+  await renderCustomerAccount();
+};
+
 document.querySelectorAll("[data-account-form]").forEach((form) => {
   const message = form.querySelector("[data-form-message]");
   form.addEventListener("input", (event) => {
@@ -1623,7 +1955,7 @@ document.querySelectorAll("[data-account-form]").forEach((form) => {
     if (message) message.textContent = "";
   });
 
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const isValid = validateAccountForm(form);
     form.classList.toggle("has-errors", !isValid);
@@ -1635,28 +1967,287 @@ document.querySelectorAll("[data-account-form]").forEach((form) => {
       return;
     }
 
-    if (message) {
-      message.textContent = form.dataset.accountForm === "login"
-        ? "Informations validées. Connexion prête."
-        : "Informations validées. Votre compte peut être créé.";
+    const submit = form.querySelector('button[type="submit"]');
+    submit.disabled = true;
+    const originalLabel = submit.textContent;
+    submit.textContent = "Vérification…";
+    const values = Object.fromEntries(new FormData(form));
+    try {
+      const endpoint = form.dataset.accountForm === "login" ? "/api/auth/login" : "/api/auth/register";
+      const response = await fetch(endpoint, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify(values)
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "Connexion impossible.");
+      customerSession = data;
+      form.reset();
+      if (message) message.textContent = "Connexion réussie.";
+      showToast(form.dataset.accountForm === "login" ? "Vous êtes connecté" : "Votre compte est créé");
+      await renderCustomerAccount();
+    } catch (error) {
+      form.classList.add("has-errors");
+      if (message) message.textContent = error.message;
+      showToast(error.message);
+    } finally {
+      submit.disabled = false;
+      submit.textContent = originalLabel;
     }
-    showToast(form.dataset.accountForm === "login" ? "Connexion validée" : "Compte validé");
   });
 });
 
+document.querySelector("[data-account-logout]")?.addEventListener("click", async () => {
+  try {
+    await fetch("/api/auth/logout", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json", ...customerSecurityHeaders() }, body: "{}" });
+  } finally {
+    customerSession = null;
+    await renderCustomerAccount();
+    showToast("Vous êtes déconnecté");
+  }
+});
+
+void initializeCustomerAccount();
+
+trackingForm?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const reference = String(new FormData(trackingForm).get("reference") || "").trim();
+  if (!reference) return;
+  const submitButton = trackingForm.querySelector('button[type="submit"]');
+  if (submitButton) {
+    submitButton.disabled = true;
+    submitButton.textContent = "Recherche...";
+  }
+
+  try {
+    const order = await fetchOrderTracking(reference);
+    if (trackingResult) trackingResult.innerHTML = renderOrderTracking(order);
+    trackingRefreshAttempts = 0;
+    scheduleGiftCardRefresh(reference, order);
+    showToast("Suivi commande chargé");
+  } catch (error) {
+    if (trackingResult) trackingResult.innerHTML = `<h2>Commande introuvable</h2><p>${error.message}</p>`;
+    showToast(error.message || "Commande introuvable");
+  } finally {
+    if (submitButton) {
+      submitButton.disabled = false;
+      submitButton.textContent = "Suivre la commande";
+    }
+  }
+});
+
+trackingResult?.addEventListener("click", async (event) => {
+  const copyButton = event.target.closest("[data-copy-digital-code]");
+  if (copyButton) {
+    try {
+      await navigator.clipboard.writeText(copyButton.dataset.copyDigitalCode || "");
+      copyButton.textContent = "Copié ✓";
+      showToast("Code copié");
+    } catch {
+      showToast("Copie impossible sur ce navigateur");
+    }
+    return;
+  }
+  if (!event.target.closest("[data-download-digital-codes]")) return;
+  const reference = String(trackingForm?.querySelector('[name="reference"]')?.value || "commande").trim();
+  const codes = [...trackingResult.querySelectorAll(".digital-code-list article")]
+    .map((item) => `${item.querySelector("span")?.textContent || "Carte cadeau"}\n${item.querySelector("code")?.textContent || ""}`)
+    .join("\n\n");
+  if (!codes) return;
+  const url = URL.createObjectURL(new Blob([`SILVERSE SHOP — ${reference}\n\n${codes}\n`], { type: "text/plain;charset=utf-8" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `silverse-${reference.replace(/[^a-z0-9-]+/gi, "-")}-codes.txt`;
+  link.click();
+  URL.revokeObjectURL(url);
+});
+
+orderStatusForm?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const formData = new FormData(orderStatusForm);
+  const reference = String(formData.get("reference") || "").trim();
+  const status = String(formData.get("status") || "processing");
+  const note = String(formData.get("note") || "").trim();
+  const location = String(formData.get("location") || "SILVERSE SHOP").trim();
+  const submitButton = orderStatusForm.querySelector('button[type="submit"]');
+  if (submitButton) {
+    submitButton.disabled = true;
+    submitButton.textContent = "Mise à jour...";
+  }
+
+  try {
+    const response = await fetch(`/api/orders/${encodeURIComponent(reference)}/status`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status, note, location })
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "Mise à jour refusée");
+    if (orderStatusResult) orderStatusResult.innerHTML = renderOrderTracking(data.order);
+    showToast("Commande mise à jour");
+  } catch (error) {
+    if (orderStatusResult) orderStatusResult.innerHTML = `<p>${error.message || "Impossible de mettre à jour la commande"}</p>`;
+    showToast(error.message || "Impossible de mettre à jour la commande");
+  } finally {
+    if (submitButton) {
+      submitButton.disabled = false;
+      submitButton.textContent = "Mettre à jour la commande";
+    }
+  }
+});
+
+const verifyCheckoutPlayer = async () => {
+  const form = playerLookupButton.closest("form");
+  const playerId = form?.querySelector('[name="playerId"]')?.value.trim() || "";
+  const game = cart.find((item) => item.categorySlug === "jeux");
+  const gameName = game?.name || "";
+  const region = inferGameRegion(gameName);
+  const regionField = form?.querySelector('[name="region"]');
+  const nicknameField = form?.querySelector('[name="nickname"]');
+  if (regionField) regionField.value = region;
+  if (!playerId) {
+    showToast("Renseignez votre UID joueur");
+    return;
+  }
+  if (!/free\s*fire/i.test(gameName)) {
+    if (nicknameField) nicknameField.value = "";
+    if (playerLookupResult) playerLookupResult.innerHTML = `<p class="is-success"><strong>UID enregistré.</strong> Région détectée : ${escapeHtml(region)}.</p>`;
+    showToast("UID prêt pour la recharge");
+    return;
+  }
+  playerLookupButton.disabled = true;
+  playerLookupButton.textContent = "Vérification...";
+  try {
+    const response = await fetch("/api/catalog/player-lookup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ uid: playerId, region: region.toLowerCase().replace(/[^a-z-]/g, "") || "global" })
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "UID non vérifié");
+    const nickname = findLookupValue(data, ["nickname", "username", "playername", "player_name", "name"]);
+    const detectedRegion = findLookupValue(data, ["region", "server", "zone"]) || region;
+    if (nicknameField) nicknameField.value = nickname;
+    if (regionField) regionField.value = detectedRegion;
+    if (playerLookupResult) playerLookupResult.innerHTML = `<p class="is-success"><strong>Compte vérifié${nickname ? ` : ${escapeHtml(nickname)}` : ""}.</strong> Région : ${escapeHtml(detectedRegion)}.</p>`;
+    showToast("UID Free Fire vérifié");
+  } catch (error) {
+    if (playerLookupResult) playerLookupResult.innerHTML = `<p>${error.message}</p>`;
+    showToast(error.message || "Vérification UID impossible");
+  } finally {
+    playerLookupButton.disabled = false;
+    playerLookupButton.textContent = "Vérifier mon UID";
+  }
+};
+
+playerLookupButton?.addEventListener("click", verifyCheckoutPlayer);
+checkoutForm?.querySelector('[name="playerId"]')?.addEventListener("blur", () => {
+  if (checkoutForm.querySelector('[name="playerId"]')?.value.trim()) void verifyCheckoutPlayer();
+});
+
 document.querySelectorAll("[data-checkout-submit]").forEach((button) => {
-  button.addEventListener("click", () => {
+  button.addEventListener("click", async () => {
     if (cart.length === 0) {
       showToast("Votre panier est vide");
       return;
     }
-    cart = [];
-    saveCart();
-    updateCartCount();
-    renderCartPage();
-    showToast("Commande confirmée");
+
+    const form = button.closest("form");
+    const email = form?.querySelector('[name="email"]')?.value.trim() || "";
+    const phone = form?.querySelector('[name="phone"]')?.value.trim() || "";
+    const firstName = form?.querySelector('[name="firstName"]')?.value.trim() || "";
+    const lastName = form?.querySelector('[name="lastName"]')?.value.trim() || "";
+    const address = form?.querySelector('[name="address"]')?.value.trim() || "";
+    const city = form?.querySelector('[name="city"]')?.value.trim() || "";
+    const country = form?.querySelector('[name="country"]')?.value.trim() || "";
+    const countryCode = form?.querySelector('[name="countryCode"]')?.value.trim().toUpperCase() || "SN";
+    const playerId = form?.querySelector('[name="playerId"]')?.value.trim() || "";
+    const region = form?.querySelector('[name="region"]')?.value.trim() || "";
+    const nickname = form?.querySelector('[name="nickname"]')?.value.trim() || "";
+    const paymentMethod = form?.querySelector('[name="paymentMethod"]')?.value || "";
+    const notes = form?.querySelector('[name="notes"]')?.value.trim() || "";
+    const hasPhysical = cart.some((item) => item.type === "physical");
+    const hasGame = cart.some((item) => item.categorySlug === "jeux");
+    const deliveryOption = form?.querySelector('[name="deliveryOption"]:checked')?.value || "address_now";
+    const latitude = form?.querySelector('[name="latitude"]')?.value || "";
+    const longitude = form?.querySelector('[name="longitude"]')?.value || "";
+    if (!email || !phone || !firstName || !lastName) {
+      showToast("Complétez vos informations client");
+      return;
+    }
+    if (hasGame && !playerId) {
+      showToast("Renseignez l’UID du compte à recharger");
+      form?.querySelector('[name="playerId"]')?.focus();
+      return;
+    }
+    if (hasPhysical && deliveryOption === "address_now" && (!address || !city || !country)) {
+      showToast("Renseignez l’adresse complète de livraison");
+      return;
+    }
+    if (hasPhysical && deliveryOption === "current_location" && (!latitude || !longitude)) {
+      showToast("Enregistrez votre position actuelle avant de payer");
+      return;
+    }
+    button.disabled = true;
+    button.dataset.submitting = "true";
+    button.textContent = "Connexion à Money Fusion...";
+
+    try {
+      await refreshCustomerSession();
+      const configResponse = await fetch("/api/moneyfusion/config");
+      const config = await configResponse.json();
+      if (!config.configured) throw new Error("Money Fusion n’est pas encore configuré sur le serveur.");
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json", ...customerSecurityHeaders() },
+        body: JSON.stringify({
+          customer: { email, phone, firstName, lastName, address, city, country, paymentMethod, notes, deliveryOption, latitude, longitude },
+          fulfillment: { playerId, region, nickname },
+          items: cart.map((item) => ({ id: item.id, variationId: item.variationId || "", qty: item.qty || 1 }))
+        })
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Commande refusée");
+
+      const paymentResponse = await fetch("/api/payments/moneyfusion/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: data.order.id, checkoutToken: data.checkoutToken, countryCode })
+      });
+      const paymentData = await paymentResponse.json();
+      if (!paymentResponse.ok) throw new Error(`${paymentData.error || "Paiement Money Fusion indisponible"} Commande conservée : ${data.order.id}`);
+
+      cart = [];
+      saveCart();
+      updateCartCount();
+      renderCartPage();
+      localStorage.setItem("silverse:last-order", JSON.stringify({ id: data.order.id, trackingNumber: data.order.trackingNumber }));
+      if (orderConfirmation) {
+        orderConfirmation.innerHTML = `<p><strong>Commande enregistrée</strong><br>${data.order.id}<br>Paiement : ${data.order.payment?.status === "succeeded" ? "confirmé" : "en attente"}<br>Suivi : ${data.order.trackingNumber}</p><a class="text-link more-link" href="tracking.html?ref=${encodeURIComponent(data.order.trackingNumber)}">Voir le suivi <span aria-hidden="true">→</span></a>`;
+      }
+      showToast(`Commande ${data.order.id} enregistrée`);
+      if (paymentData.checkoutUrl) window.location.assign(paymentData.checkoutUrl);
+    } catch (error) {
+      showToast(error.message || "Impossible de confirmer la commande");
+    } finally {
+      delete button.dataset.submitting;
+      button.disabled = false;
+      button.textContent = "Payer avec Money Fusion";
+    }
   });
 });
+
+if (trackingForm && trackingResult) {
+  const reference = new URLSearchParams(window.location.search).get("ref");
+  if (reference) {
+    const input = trackingForm.querySelector('[name="reference"]');
+    if (input) input.value = reference;
+    trackingForm.requestSubmit();
+  }
+}
 
 localLinks.forEach((link) => {
   link.addEventListener("click", (event) => {

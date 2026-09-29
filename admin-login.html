@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>Connexion administration | SILVERSE SHOP</title>
+  <link rel="icon" href="/assets/silverse-logo.png" type="image/png">
+  <link rel="stylesheet" href="/styles.css?v=20260929-4">
+</head>
+<body class="admin-login-page">
+  <main class="admin-login-shell">
+    <a class="admin-login-brand" href="/" aria-label="Retour à SILVERSE SHOP">
+      <span class="brand-mark" aria-hidden="true">S</span>
+      <span><strong>SILVERSE SHOP</strong><small>Administration sécurisée</small></span>
+    </a>
+
+    <section class="admin-login-card" aria-labelledby="admin-login-title">
+      <div class="admin-login-heading">
+        <span class="admin-login-lock" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path><path d="M12 14v3"></path></svg>
+        </span>
+        <p>Espace privé</p>
+        <h1 id="admin-login-title">Connexion administrateur</h1>
+        <span>Identifiez-vous pour accéder au tableau de bord et aux opérations financières.</span>
+      </div>
+
+      <form class="admin-login-form" data-admin-login-form novalidate>
+        <label for="admin-email">Adresse e-mail</label>
+        <input id="admin-email" name="email" type="email" autocomplete="username" inputmode="email" required autofocus placeholder="nom@exemple.com">
+
+        <label for="admin-password">Mot de passe</label>
+        <div class="admin-password-field">
+          <input id="admin-password" name="password" type="password" autocomplete="current-password" required placeholder="Votre mot de passe">
+          <button type="button" data-toggle-admin-password aria-label="Afficher le mot de passe">Afficher</button>
+        </div>
+
+        <p class="admin-login-error" data-admin-login-error role="alert" aria-live="polite"></p>
+        <button class="admin-login-submit" type="submit" data-admin-login-submit>Se connecter</button>
+      </form>
+
+      <div class="admin-login-security"><span>✓</span> Connexion chiffrée et session privée</div>
+    </section>
+
+    <a class="admin-login-back" href="/">← Retour à la boutique</a>
+  </main>
+  <script src="/admin-login.js?v=20260929-4"></script>
+</body>
+</html>

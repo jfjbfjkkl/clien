@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">Logo SILVERSE SHOP</title>
+  <desc id="desc">Sac de boutique doré accompagné d'un éclat</desc>
+  <defs>
+    <linearGradient id="bg" x1="15" y1="10" x2="112" y2="120" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#292720"/>
+      <stop offset="1" stop-color="#0d0e11"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="36" y1="34" x2="94" y2="101" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f4dda3"/>
+      <stop offset=".46" stop-color="#d3ad63"/>
+      <stop offset="1" stop-color="#9a6b2c"/>
+    </linearGradient>
+  </defs>
+  <rect x="3" y="3" width="122" height="122" rx="31" fill="url(#bg)"/>
+  <rect x="4.5" y="4.5" width="119" height="119" rx="29.5" fill="none" stroke="#e2c580" stroke-opacity=".48" stroke-width="3"/>
+  <path d="M35 50h58l-4.5 54h-49z" fill="#d3ad63"/>
+  <path d="M48 53V42c0-10 7-18 16-18s16 8 16 18v11" fill="none" stroke="#f4dda3" stroke-width="8" stroke-linecap="round"/>
+  <path d="M47 68c9 8 25 8 34 0" fill="none" stroke="#171612" stroke-opacity=".72" stroke-width="5" stroke-linecap="round"/>
+  <path d="M96 20l3.7 9.3L109 33l-9.3 3.7L96 46l-3.7-9.3L83 33l9.3-3.7z" fill="#fff3c9"/>
+</svg>

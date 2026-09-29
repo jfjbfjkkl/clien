@@ -3,94 +3,92 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Compte | Nebula Market</title>
-    <meta name="description" content="Connectez-vous ou créez votre compte Nebula Market pour suivre vos commandes et retrouver vos favoris.">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="/assets/silverse-logo.png" type="image/png">
+    <title>Compte | SILVERSE SHOP</title>
+    <meta name="description" content="Connectez-vous ou créez votre compte SILVERSE SHOP pour suivre vos commandes et retrouver vos favoris.">
+    <meta name="robots" content="noindex,nofollow">
+    <link rel="stylesheet" href="styles.css?v=20260929-4">
   </head>
   <body class="account-page">
     <div class="page-loader" data-loader><span></span></div>
-    <header class="site-header"><a class="brand" href="index.html"><span class="brand-mark">N</span><span>Nebula Market</span></a></header>
+    <header class="site-header"><a class="brand" href="index.html"><span class="brand-mark">S</span><span>SILVERSE SHOP</span></a></header>
     <main>
-      <section class="account-hero page-enter">
-        <div>
-          <p class="eyebrow">Compte utilisateur</p>
-          <h1>Votre espace personnel</h1>
-          <p>Connectez-vous, créez votre compte et gardez vos commandes, favoris et informations au même endroit.</p>
-        </div>
+      <section class="account-session" data-account-session hidden>
+        <article class="account-card account-profile-card">
+          <div><p class="eyebrow">Compte connecté</p><h2 data-account-name>Mon compte</h2><p data-account-email></p></div>
+          <button type="button" data-account-logout>Se déconnecter</button>
+        </article>
+        <article class="account-card">
+          <div class="account-card-heading"><p class="eyebrow">Historique</p><h2>Mes commandes</h2></div>
+          <div class="account-orders" data-account-orders><p>Chargement…</p></div>
+        </article>
       </section>
 
-      <section class="account-shell" aria-label="Connexion et creation de compte">
-        <form class="account-card" data-account-form="login" novalidate>
-          <div class="account-card-heading">
-            <p class="eyebrow">Connexion</p>
-            <h2>Se connecter</h2>
+      <section class="account-auth-stage page-enter" data-account-forms aria-label="Connexion et création de compte">
+        <aside class="account-showcase">
+          <div class="account-showcase-brand"><img src="assets/silverse-logo.png" width="46" height="46" alt="Logo SILVERSE SHOP"><span>SILVERSE SHOP</span></div>
+          <div class="account-showcase-copy">
+            <p class="eyebrow">Votre espace privé</p>
+            <h1>Vos achats.<br>Votre univers.</h1>
+            <p>Un seul compte pour commander, suivre vos livraisons et retrouver vos produits favoris.</p>
           </div>
-          <label>Adresse e-mail
-            <input type="email" name="email" autocomplete="email" placeholder="vous@email.com" required>
-            <small data-field-error></small>
-          </label>
-          <label>Mot de passe
-            <input type="password" name="password" autocomplete="current-password" placeholder="Votre mot de passe" minlength="6" required>
-            <small data-field-error></small>
-          </label>
-          <div class="account-options">
-            <label class="account-check"><input type="checkbox" name="remember"> Se souvenir de moi</label>
-            <a href="#forgot-password">Mot de passe oublié</a>
+          <div class="account-benefits">
+            <div><span>01</span><p><strong>Suivi centralisé</strong><small>Vos commandes physiques et digitales au même endroit.</small></p></div>
+            <div><span>02</span><p><strong>Paiement protégé</strong><small>Vos données sensibles ne transitent jamais dans le navigateur.</small></p></div>
+            <div><span>03</span><p><strong>Livraison simplifiée</strong><small>Retrouvez chaque statut et référence sans effort.</small></p></div>
           </div>
-          <p class="account-form-message" data-form-message></p>
-          <button type="submit">Se connecter</button>
-        </form>
+          <p class="account-showcase-note"><span>✓</span> Connexion chiffrée et sessions sécurisées</p>
+        </aside>
 
-        <form class="account-card account-card-register" data-account-form="register" novalidate>
-          <div class="account-card-heading">
-            <p class="eyebrow">Création de compte</p>
-            <h2>Créer mon compte</h2>
+        <div class="account-auth-content">
+          <header class="account-auth-heading"><p class="eyebrow">Bienvenue</p><h2>Accédez à votre compte</h2><p>Déjà client ou nouvelle inscription : choisissez votre espace.</p></header>
+          <div class="account-shell">
+            <form class="account-card" data-account-form="login" novalidate>
+              <div class="account-card-heading"><span class="account-form-index">01</span><div><p class="eyebrow">Déjà client</p><h2>Se connecter</h2></div></div>
+              <label>Adresse e-mail<input type="email" name="email" autocomplete="email" placeholder="vous@email.com" required><small data-field-error></small></label>
+              <label>Mot de passe<input type="password" name="password" autocomplete="current-password" placeholder="Votre mot de passe" minlength="10" required><small data-field-error></small></label>
+              <div class="account-options"><label class="account-check"><input type="checkbox" name="remember"> Rester connecté</label><a href="#forgot-password">Mot de passe oublié ?</a></div>
+              <p class="account-form-message" data-form-message></p>
+              <button type="submit">Se connecter <span aria-hidden="true">→</span></button>
+            </form>
+
+            <form class="account-card account-card-register" data-account-form="register" novalidate>
+              <div class="account-card-heading"><span class="account-form-index">02</span><div><p class="eyebrow">Nouveau client</p><h2>Créer un compte</h2></div></div>
+              <label>Nom complet<input type="text" name="fullName" autocomplete="name" placeholder="Votre nom complet" required><small data-field-error></small></label>
+              <div class="account-field-grid account-identity-grid">
+                <label>Adresse e-mail<input type="email" name="email" autocomplete="email" placeholder="vous@email.com" required><small data-field-error></small></label>
+                <label>Téléphone <span>optionnel</span><input type="tel" name="phone" autocomplete="tel" placeholder="+228 00 00 00 00"><small data-field-error></small></label>
+              </div>
+              <div class="account-field-grid">
+                <label>Mot de passe<input type="password" name="password" autocomplete="new-password" placeholder="Minimum 10 caractères" minlength="10" required><small data-field-error></small></label>
+                <label>Confirmation<input type="password" name="confirmPassword" autocomplete="new-password" placeholder="Confirmer" minlength="10" required><small data-field-error></small></label>
+              </div>
+              <label class="account-check account-terms"><input type="checkbox" name="terms" required><span>J’accepte les conditions d’utilisation et la politique de confidentialité.</span><small data-field-error></small></label>
+              <p class="account-form-message" data-form-message></p>
+              <button type="submit">Créer mon espace <span aria-hidden="true">→</span></button>
+            </form>
           </div>
-          <label>Nom complet
-            <input type="text" name="fullName" autocomplete="name" placeholder="Votre nom complet" required>
-            <small data-field-error></small>
-          </label>
-          <label>Adresse e-mail
-            <input type="email" name="email" autocomplete="email" placeholder="vous@email.com" required>
-            <small data-field-error></small>
-          </label>
-          <label>Numéro de téléphone <span>optionnel</span>
-            <input type="tel" name="phone" autocomplete="tel" placeholder="+228 00 00 00 00">
-            <small data-field-error></small>
-          </label>
-          <div class="account-field-grid">
-            <label>Mot de passe
-              <input type="password" name="password" autocomplete="new-password" placeholder="Minimum 6 caractères" minlength="6" required>
-              <small data-field-error></small>
-            </label>
-            <label>Confirmation
-              <input type="password" name="confirmPassword" autocomplete="new-password" placeholder="Confirmer" minlength="6" required>
-              <small data-field-error></small>
-            </label>
-          </div>
-          <label class="account-check account-terms">
-            <input type="checkbox" name="terms" required>
-            <span>J'accepte les conditions d'utilisation</span>
-            <small data-field-error></small>
-          </label>
-          <p class="account-form-message" data-form-message></p>
-          <button type="submit">Créer mon compte</button>
-        </form>
+        </div>
       </section>
 
       <section class="page-shell account-support" id="support">
         <div class="page-panel">
           <p class="eyebrow">Assistance</p>
           <h2>Besoin d'aide ?</h2>
+          <p>Un problème avec une commande, un paiement ou votre compte ? Contactez directement l’équipe SILVERSE SHOP.</p>
+          <div class="support-contact-card">
+            <a href="mailto:Amegafranck7@gmail.com">Amegafranck7@gmail.com</a>
+            <a href="tel:+22890572457">+228 90 57 24 57</a>
+          </div>
           <p id="forgot-password">Pour réinitialiser votre mot de passe, renseignez votre e-mail dans l'espace de connexion puis contactez le support si nécessaire.</p>
           <p id="faq">Notre équipe vous accompagne pour les questions de commande, de livraison, de favoris et de compte utilisateur.</p>
           <p id="refund">Les demandes de remboursement sont traitées selon le statut de préparation, de livraison ou d'activation du produit.</p>
           <p id="privacy">Vos données sont utilisées uniquement pour la sécurité du compte, le suivi de commande et l'assistance client.</p>
-          <p id="legal">Les conditions d'utilisation encadrent les achats, les paiements, les livraisons et l'utilisation du compte Nebula Market.</p>
+          <p id="legal">Les conditions d'utilisation encadrent les achats, les paiements, les livraisons et l'utilisation du compte SILVERSE SHOP.</p>
         </div>
       </section>
     </main>
-    <script src="script.js"></script>
+    <script src="script.js?v=20260929-4"></script>
     <div class="toast" data-toast role="status" aria-live="polite"></div>
   </body>
 </html>

@@ -1,0 +1,29 @@
+[Unit]
+Description=SILVERSE SHOP Node.js application
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=silverse-shop
+Group=silverse-shop
+WorkingDirectory=/var/www/silverse-shop
+Environment=NODE_ENV=production
+Environment=HOST=127.0.0.1
+Environment=PORT=8020
+Environment=APP_BASE_URL=https://silverse.fr
+Environment=PUBLIC_SITE_URL=https://silverse.fr
+EnvironmentFile=-/etc/silverse-shop.env
+ExecStart=/usr/bin/node /var/www/silverse-shop/server.mjs
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/www/silverse-shop/data
+RestrictSUIDSGID=true
+LockPersonality=true
+
+[Install]
+WantedBy=multi-user.target

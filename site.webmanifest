@@ -1,0 +1,17 @@
+{
+  "name": "SILVERSE SHOP",
+  "short_name": "SILVERSE",
+  "description": "Boutique en ligne de produits physiques, gaming et digitaux.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#f04a37",
+  "icons": [
+    {
+      "src": "/assets/silverse-logo.png",
+      "sizes": "1254x1254",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

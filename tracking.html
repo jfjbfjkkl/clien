@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="/assets/silverse-logo.png" type="image/png">
+    <title>Suivi commande | SILVERSE SHOP</title>
+    <meta name="robots" content="noindex,nofollow">
+    <link rel="stylesheet" href="styles.css?v=20260929-4">
+  </head>
+  <body>
+    <div class="page-loader" data-loader><span></span></div>
+    <header class="site-header">
+      <a class="brand" href="index.html"><span class="brand-mark">S</span><span>SILVERSE SHOP</span></a>
+    </header>
+    <main>
+      <section class="page-hero page-enter">
+        <div>
+          <p class="eyebrow">Suivi commande</p>
+          <h1>Consulter l’avancement</h1>
+          <p>Entrez votre numéro de commande ou votre numéro de suivi pour connaître le traitement en cours.</p>
+        </div>
+      </section>
+      <section class="page-shell page-grid">
+        <form class="checkout-form" data-tracking-form>
+          <label>Référence commande<input name="reference" type="text" placeholder="ORD-... ou TRK-..." required></label>
+          <button type="submit">Suivre la commande</button>
+        </form>
+        <aside class="page-panel" data-tracking-result>
+          <h2>État de la commande</h2>
+          <p>Le détail du traitement apparaîtra ici après recherche.</p>
+        </aside>
+      </section>
+    </main>
+    <script src="script.js?v=20260929-4"></script>
+    <div class="toast" data-toast role="status" aria-live="polite"></div>
+  </body>
+</html>

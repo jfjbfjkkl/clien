@@ -3,20 +3,59 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Paiement | Nebula Market</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="/assets/silverse-logo.png" type="image/png">
+    <title>Paiement | SILVERSE SHOP</title>
+    <meta name="robots" content="noindex,nofollow">
+    <link rel="stylesheet" href="styles.css?v=20260929-4">
   </head>
   <body>
     <div class="page-loader" data-loader><span></span></div>
-    <header class="site-header"><a class="brand" href="index.html"><span class="brand-mark">N</span><span>Nebula Market</span></a><nav class="main-nav" aria-label="Navigation principale"><a href="index.html">Accueil</a><a href="boutique.html">Boutique Physique</a><a href="digital.html">Produits Digitaux</a></nav></header>
+    <header class="site-header"><a class="brand" href="index.html"><span class="brand-mark">S</span><span>SILVERSE SHOP</span></a><nav class="main-nav" aria-label="Navigation principale"><a href="index.html">Accueil</a><a href="boutique.html">Boutique Physique</a><a href="digital.html">Produits Digitaux</a></nav></header>
     <main>
-      <section class="page-hero"><div><p class="eyebrow">Paiement sécurisé</p><h1>Finaliser la commande</h1><p>Vérifiez vos informations, choisissez votre moyen de paiement et confirmez votre achat en toute confiance.</p></div></section>
+      <section class="page-hero"><div><p class="eyebrow">Paiement sécurisé</p><h1>Finaliser la commande</h1><p>Renseignez vos coordonnées, choisissez votre option de livraison et payez en toute sécurité.</p></div></section>
       <section class="page-shell page-grid">
-        <form class="checkout-form"><label>Email<input type="email" placeholder="vous@email.com"></label><label>Moyen de paiement<select><option>Carte bancaire</option><option>Mobile money</option><option>Wallet</option></select></label><label>Notes<textarea placeholder="Informations utiles"></textarea></label><button type="button" data-checkout-submit>Confirmer la commande</button></form>
-        <aside class="page-panel"><h2>Résumé</h2><p data-cart-summary>Votre panier sera validé après confirmation du paiement.</p><a class="text-link more-link" href="cart.html">Retour au panier <span aria-hidden="true">→</span></a></aside>
+        <form class="checkout-form" data-checkout-form>
+          <div class="checkout-section-heading"><span>01</span><div><strong>Vos coordonnées</strong><small>Nécessaires pour confirmer et suivre la commande.</small></div></div>
+          <div class="checkout-field-grid"><label>Prénom<input name="firstName" autocomplete="given-name" required placeholder="Votre prénom"></label><label>Nom<input name="lastName" autocomplete="family-name" required placeholder="Votre nom"></label></div>
+          <div class="checkout-field-grid"><label>Email<input name="email" type="email" autocomplete="email" required placeholder="vous@email.com"></label><label>Téléphone<input name="phone" type="tel" autocomplete="tel" required placeholder="+228 90 00 00 00"></label></div>
+
+          <fieldset class="checkout-delivery" data-physical-delivery hidden>
+            <legend><span>02</span><div><strong>Livraison du produit physique</strong><small>Choisissez comment nous transmettre votre adresse.</small></div></legend>
+            <div class="delivery-choice-grid">
+              <label class="delivery-choice"><input type="radio" name="deliveryOption" value="address_now" checked><span><b>Saisir mon adresse</b><small>Indiquez maintenant l’adresse exacte de livraison.</small></span></label>
+              <label class="delivery-choice"><input type="radio" name="deliveryOption" value="current_location"><span><b>Utiliser ma position</b><small>Autorisez la localisation depuis cet appareil.</small></span></label>
+              <label class="delivery-choice"><input type="radio" name="deliveryOption" value="communicate_later"><span><b>Communiquer plus tard</b><small>Nous vous contacterons lorsque le produit sera disponible.</small></span></label>
+            </div>
+            <div class="delivery-address-fields" data-delivery-address-fields>
+              <label>Adresse complète<input name="address" autocomplete="street-address" placeholder="Quartier, rue, repère..."></label>
+              <div class="checkout-field-grid"><label>Ville<input name="city" autocomplete="address-level2" placeholder="Ville"></label><label>Pays<input name="country" autocomplete="country-name" value="Togo" placeholder="Pays"></label></div>
+            </div>
+            <div class="delivery-location-box" data-delivery-location-box hidden>
+              <button type="button" class="checkout-location-button" data-use-current-location>⌖ Utiliser ma position actuelle</button>
+              <input name="latitude" type="hidden"><input name="longitude" type="hidden">
+              <p data-location-status>Votre navigateur demandera l’autorisation d’accéder à votre position.</p>
+            </div>
+            <div class="delivery-later-note" data-delivery-later-note hidden><strong>Vous pouvez payer maintenant.</strong><p>L’équipe vous contactera dès que le produit est disponible pour récupérer l’adresse. La livraison sera ensuite effectuée sous 24 h.</p></div>
+            <div class="delivery-commitment"><span>24H</span><p><strong>Livraison sous 24 heures</strong><small>Après disponibilité du produit et validation de l’adresse ou de la position.</small></p></div>
+          </fieldset>
+
+          <div data-digital-checkout-fields hidden>
+            <div class="checkout-section-heading"><span data-checkout-step>02</span><div><strong>Informations du compte de jeu</strong><small>À compléter uniquement si le produit sélectionné les demande.</small></div></div>
+            <label>ID joueur / UID<input name="playerId" type="text" inputmode="text" autocomplete="off" placeholder="Saisissez l’identifiant du compte joueur"></label>
+            <input name="region" type="hidden"><input name="nickname" type="hidden">
+            <button type="button" class="checkout-secondary-button" data-player-lookup>Vérifier mon UID</button><div class="player-lookup-result" data-player-lookup-result aria-live="polite"></div>
+          </div>
+
+          <div class="checkout-section-heading"><span data-payment-step>03</span><div><strong>Paiement</strong><small>La transaction est traitée sur la page sécurisée Money Fusion.</small></div></div>
+          <div class="checkout-field-grid"><label>Code pays<input name="countryCode" maxlength="2" value="TG" required placeholder="TG"></label><label>Moyen de paiement<select name="paymentMethod"><option value="moneyfusion">Money Fusion — carte ou mobile money</option></select></label></div>
+          <label>Notes<textarea name="notes" placeholder="Instructions ou repère utile pour votre commande"></textarea></label>
+          <button class="checkout-pay-button" type="button" data-checkout-submit disabled>Préparation de la commande…</button>
+          <p class="checkout-security-note">🔒 Aucun numéro de carte ou code secret n’est enregistré par SILVERSE SHOP.</p>
+        </form>
+        <aside class="page-panel checkout-summary-panel"><p class="eyebrow">Votre commande</p><h2>Résumé</h2><p data-cart-summary>Votre panier sera validé après confirmation du paiement.</p><div class="checkout-promise"><strong>Livraison physique sous 24 h</strong><span>Une fois le produit disponible et l’adresse confirmée.</span></div><div data-order-confirmation></div><a class="text-link more-link" href="cart.html">Retour au panier <span aria-hidden="true">→</span></a><a class="text-link more-link" href="tracking.html">Suivre une commande <span aria-hidden="true">→</span></a></aside>
       </section>
     </main>
-    <script src="script.js"></script>
+    <script src="script.js?v=20260929-4"></script>
     <div class="toast" data-toast role="status" aria-live="polite"></div>
   </body>
 </html>

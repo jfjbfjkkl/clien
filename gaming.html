@@ -3,14 +3,17 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Nebula Gaming | Recharges et contenus gaming</title>
-    <meta name="description" content="L'espace gaming premium de Nebula Market : recharges, cartes et contenus livrés instantanément.">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="/assets/silverse-logo.png" type="image/png">
+    <title>SILVERSE GAMING | Recharges et contenus gaming</title>
+    <meta name="description" content="L'espace gaming premium de SILVERSE SHOP : recharges, cartes et contenus livrés instantanément.">
+    <link rel="canonical" href="__SITE_URL__/jeux">
+    <meta property="og:title" content="SILVERSE GAMING | Recharges et contenus gaming"><meta property="og:description" content="Catalogue gaming sécurisé avec recharges et contenus disponibles en ligne."><meta property="og:url" content="__SITE_URL__/jeux"><meta property="og:type" content="website">
+    <link rel="stylesheet" href="styles.css?v=20260929-4">
   </head>
   <body class="gaming-page">
     <div class="page-loader" data-loader><span></span></div>
     <header class="site-header">
-      <a class="brand" href="index.html"><span class="brand-mark">N</span><span>Nebula Gaming</span></a>
+      <a class="brand" href="index.html"><span class="brand-mark">S</span><span>SILVERSE GAMING</span></a>
       <nav class="main-nav" aria-label="Navigation principale"><a href="index.html">Accueil</a><a href="boutique.html">Boutique Physique</a><a href="digital.html">Produits Digitaux</a></nav>
       <div class="header-tools">
         <button class="icon-button" type="button" aria-label="Recherche" data-open-search><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4.2-4.2"></path></svg></button>
@@ -50,75 +53,31 @@
           <div class="gaming-actions"><a class="primary-button" href="#jeux">Explorer les jeux</a><a class="gaming-secondary" href="#offres">Voir les offres</a></div>
           <div class="gaming-meta"><span><strong>3 min</strong> livraison moyenne</span><span><strong>24/7</strong> disponibilité</span><span><strong>100%</strong> sécurisé</span></div>
         </div>
-        <aside class="gaming-spotlight" data-reveal><span>Offre vedette</span><strong>Diamants Free Fire</strong><p>Bonus disponible sur certains packs.</p><a href="product.html?id=free-fire-diamonds">Découvrir →</a></aside>
+        <aside class="gaming-spotlight" data-reveal><span>SILVERSE GAMING</span><strong>Recharge sécurisée</strong><p>Choisissez votre produit et créditez directement votre compte de jeu.</p><a href="#catalogue">Voir le catalogue →</a></aside>
       </section>
 
-      <section class="gaming-popular-section gaming-section" id="jeux-populaires" data-reveal>
+      <section class="gaming-popular-section gaming-section" id="catalogue" data-reveal>
         <div class="gaming-heading">
           <div>
-            <p class="eyebrow">Jeux populaires</p>
-            <h2>Les titres phares</h2>
+            <p class="eyebrow">Recharges directes</p>
+            <h2>Créditez directement votre compte de jeu</h2>
           </div>
-          <a class="text-link" href="#offres">Voir tout →</a>
+          <span data-gaming-count>0 produit</span>
         </div>
-        <div class="gaming-popular-grid" aria-label="Jeux populaires">
-          <article class="gaming-popular-card" data-reveal data-product-id="free-fire-diamonds" data-product-name="Diamants Free Fire" data-product-price="À partir de 520 FCFA">
-            <div class="gaming-popular-media" style="background-image: url('assets/image copy 3.png')" role="img" aria-label="Diamants Free Fire"></div>
-            <div class="gaming-popular-body">
-              <h3>Diamants Free Fire</h3>
-              <p>Recharge rapide et sécurisée. Bonus disponible sur certains packs.</p>
-              <div class="gaming-popular-actions"><a class="primary-button" href="product.html?id=free-fire-diamonds">Voir</a><button type="button" data-add-cart>Acheter</button></div>
-            </div>
-          </article>
-          <article class="gaming-popular-card" data-reveal data-product-id="cod-mobile-cp" data-product-name="CP Call of Duty Mobile" data-product-price="À partir de 1 000 FCFA">
-            <div class="gaming-popular-media" style="background-image: url('assets/image copy 4.png')" role="img" aria-label="CP Call of Duty Mobile"></div>
-            <div class="gaming-popular-body">
-              <h3>Call of Duty Mobile CP</h3>
-              <p>Crédits pour achats in-game, livraison instantanée.</p>
-              <div class="gaming-popular-actions"><a class="primary-button" href="product.html?id=cod-mobile-cp">Voir</a><button type="button" data-add-cart>Acheter</button></div>
-            </div>
-          </article>
-          <article class="gaming-popular-card" data-reveal data-product-id="pubg-uc" data-product-name="UC PUBG Mobile" data-product-price="À partir de 1 200 FCFA">
-            <div class="gaming-popular-media" style="background-image: url('assets/image copy 5.png')" role="img" aria-label="UC PUBG Mobile"></div>
-            <div class="gaming-popular-body">
-              <h3>PUBG Mobile UC</h3>
-              <p>Choisissez votre pack de UC et recevez-le instantanément.</p>
-              <div class="gaming-popular-actions"><a class="primary-button" href="product.html?id=pubg-uc">Voir</a><button type="button" data-add-cart>Acheter</button></div>
-            </div>
-          </article>
+        <div class="gaming-catalog-search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4.2-4.2"></path></svg>
+          <input type="search" placeholder="Rechercher Free Fire, PUBG, Call of Duty..." aria-label="Rechercher une recharge directe" data-gaming-search>
         </div>
+        <div class="market-product-grid gaming-api-grid" data-gaming-catalog aria-label="Catalogue de recharges gaming">
+          <div class="catalog-empty"><strong>Chargement du catalogue</strong><p>Récupération des produits disponibles…</p></div>
+        </div>
+        <div class="gaming-load-more"><button class="primary-button" type="button" data-gaming-load-more hidden>Charger plus de produits</button></div>
       </section>
 
-      <section class="gaming-mobile-search" aria-label="Recherche jeux">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4.2-4.2"></path></svg>
-        <input type="search" placeholder="Rechercher un jeu..." aria-label="Rechercher un jeu" data-gaming-search>
-      </section>
-
-      <section class="gaming-section" id="jeux" data-reveal>
-        <div class="gaming-heading"><div><p class="eyebrow">Accès rapide</p><h2>Choisissez votre univers</h2></div><a class="text-link" href="digital.html#catalogue">Tout voir →</a></div>
-        <div class="gaming-categories">
-          <a href="product.html?id=free-fire-diamonds" data-reveal><span>FF</span><strong>Free Fire</strong><em>Diamants et packs</em><i>→</i></a>
-          <a href="product.html?id=cod-mobile-cp" data-reveal><span>CP</span><strong>Call of Duty</strong><em>Crédits mobile</em><i>→</i></a>
-          <a href="product.html?id=pubg-uc" data-reveal><span>UC</span><strong>PUBG Mobile</strong><em>UC instantanés</em><i>→</i></a>
-          <a href="product.html?id=google-play" data-reveal><span>GP</span><strong>Google Play</strong><em>Jeux et contenus</em><i>→</i></a>
-        </div>
-      </section>
-
-      <section class="gaming-section" id="offres" data-reveal>
-        <div class="gaming-heading"><div><p class="eyebrow">Sélection premium</p><h2>Offres du moment</h2></div><p>Livraison instantanée</p></div>
-        <div class="gaming-products">
-          <article data-reveal data-product-id="free-fire-diamonds" data-product-name="Diamants Free Fire" data-product-price="À partir de 520 FCFA"><div class="gaming-product-visual gaming-ff"><span>FF</span><small>Battle royale</small></div><span class="gaming-badge">Populaire</span><h3>Diamants Free Fire</h3><p>Recharge rapide et sécurisée.</p><strong>À partir de 520 FCFA</strong><div class="gaming-card-actions"><a href="product.html?id=free-fire-diamonds">Voir</a><button type="button" data-add-cart>Acheter</button></div></article>
-          <article data-reveal data-product-id="cod-mobile-cp" data-product-name="CP Call of Duty Mobile" data-product-price="À partir de 1 000 FCFA"><div class="gaming-product-visual gaming-cp"><span>CP</span><small>Action mobile</small></div><span class="gaming-badge">Top vente</span><h3>Call of Duty Mobile CP</h3><p>Crédits ajoutés sans attente.</p><strong>À partir de 1 000 FCFA</strong><div class="gaming-card-actions"><a href="product.html?id=cod-mobile-cp">Voir</a><button type="button" data-add-cart>Acheter</button></div></article>
-          <article data-reveal data-product-id="pubg-uc" data-product-name="UC PUBG Mobile" data-product-price="À partir de 1 200 FCFA"><div class="gaming-product-visual gaming-uc"><span>UC</span><small>Survie tactique</small></div><span class="gaming-badge">Instant</span><h3>PUBG Mobile UC</h3><p>Choisissez votre pack de UC.</p><strong>À partir de 1 200 FCFA</strong><div class="gaming-card-actions"><a href="product.html?id=pubg-uc">Voir</a><button type="button" data-add-cart>Acheter</button></div></article>
-          <article data-reveal data-product-id="google-play" data-product-name="Carte Google Play" data-product-price="Montants flexibles"><div class="gaming-product-visual gaming-gp"><span>GP</span><small>Jeux et contenus</small></div><span class="gaming-badge">Flexible</span><h3>Carte Google Play</h3><p>Utilisable sur vos jeux favoris.</p><strong>Montants flexibles</strong><div class="gaming-card-actions"><a href="product.html?id=google-play">Voir</a><button type="button" data-add-cart>Acheter</button></div></article>
-        </div>
-      </section>
-
-      <section class="gaming-event" id="nouveautes" data-reveal><div><p class="eyebrow">Événement Nebula</p><h2>Gaming Weekend</h2><p>Des bonus temporaires et des packs sélectionnés chaque fin de semaine.</p></div><a class="primary-button" href="#offres">Découvrir la sélection</a></section>
     </main>
 
-    <footer class="site-footer simple-footer"><div><strong>Nebula Gaming</strong><p>L'univers gaming premium de Nebula Market.</p></div><nav><a href="index.html">Marketplace</a><a href="digital.html">Produits digitaux</a><a href="contact.html">Support</a><a href="cart.html">Panier</a></nav></footer>
-    <script src="script.js"></script>
+    <footer class="site-footer simple-footer"><div><strong>SILVERSE GAMING</strong><p>L'univers gaming premium de SILVERSE SHOP.</p></div><nav><a href="index.html">Marketplace</a><a href="digital.html">Produits digitaux</a><a href="contact.html">Support</a><a href="cart.html">Panier</a></nav></footer>
+    <script src="script.js?v=20260929-4"></script>
     <div class="toast" data-toast role="status" aria-live="polite"></div>
   </body>
 </html>
