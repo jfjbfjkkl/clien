@@ -517,6 +517,7 @@ const astralRequest = async (path, { method = "GET", query = {}, body = null, pa
 
   const response = await fetch(url, {
     method,
+    signal: AbortSignal.timeout(15_000),
     headers: {
       "Authorization": `Bearer ${astralApiKey}`,
       "Accept": "application/json",
@@ -1288,13 +1289,21 @@ const handleAstralApi = async (request, response, pathname) => {
     if (!allowPublicApiRequest(request, response, "freefire-lookup", 20)) return true;
     const body = await parseBody(request);
     const uid = String(body.uid || body.user_id || "").trim();
-    const region = String(body.region || "").trim().toLowerCase();
-    if (!/^[a-zA-Z0-9_-]{4,32}$/.test(uid) || !/^[a-z-]{2,20}$/.test(region)) {
+    const region = String(body.region || "").trim().toUpperCase();
+    if (!/^[a-zA-Z0-9_-]{4,32}$/.test(uid) || !/^[A-Z-]{2,20}$/.test(region)) {
       sendJson(response, 422, { error: "UID ou région invalide." });
       return true;
     }
-    const result = await astralRequest("/freefire/lookup", { method: "POST", body: { uid, region } });
-    sendJson(response, 200, JSON.parse(hideSupplierName(JSON.stringify(result.payload))));
+    try {
+      const result = await astralRequest("/freefire/lookup", { method: "POST", body: { uid, region } });
+      sendJson(response, 200, JSON.parse(hideSupplierName(JSON.stringify(result.payload))));
+    } catch (error) {
+      if (pathname === "/api/catalog/player-lookup" && ([403, 504].includes(error.statusCode) || error.name === "TimeoutError")) {
+        sendJson(response, 503, { error: "La vérification automatique du pseudo n’est pas activée pour ce catalogue. Votre UID peut néanmoins être utilisé pour la recharge." });
+      } else {
+        throw error;
+      }
+    }
     return true;
   }
 

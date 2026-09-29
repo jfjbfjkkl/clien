@@ -2119,22 +2119,30 @@ const verifyCheckoutPlayer = async () => {
   playerLookupButton.disabled = true;
   playerLookupButton.textContent = "Vérification...";
   try {
+    const lookupController = new AbortController();
+    const lookupTimeout = window.setTimeout(() => lookupController.abort(), 15_000);
     const response = await fetch("/api/catalog/player-lookup", {
       method: "POST",
+      signal: lookupController.signal,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ uid: playerId, region: region.toLowerCase().replace(/[^a-z-]/g, "") || "global" })
+      body: JSON.stringify({ uid: playerId, region: region.toUpperCase().replace(/[^A-Z-]/g, "") || "GLOBAL" })
     });
+    window.clearTimeout(lookupTimeout);
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "UID non vérifié");
-    const nickname = findLookupValue(data, ["nickname", "username", "playername", "player_name", "name"]);
+    const nickname = findLookupValue(data, ["nickname", "playernickname", "player_nickname", "username", "playername", "player_name", "accountname", "account_name", "pseudo", "nom", "name"]);
+    if (!nickname) throw new Error("Le service de vérification n’a retourné aucun pseudo pour cet UID.");
     const detectedRegion = findLookupValue(data, ["region", "server", "zone"]) || region;
     if (nicknameField) nicknameField.value = nickname;
     if (regionField) regionField.value = detectedRegion;
     if (playerLookupResult) playerLookupResult.innerHTML = `<p class="is-success"><strong>Compte vérifié${nickname ? ` : ${escapeHtml(nickname)}` : ""}.</strong> Région : ${escapeHtml(detectedRegion)}.</p>`;
     showToast("UID Free Fire vérifié");
   } catch (error) {
-    if (playerLookupResult) playerLookupResult.innerHTML = `<p>${error.message}</p>`;
-    showToast(error.message || "Vérification UID impossible");
+    const message = error.name === "AbortError"
+      ? "Le service de vérification met trop de temps à répondre. Votre UID reste utilisable pour la recharge."
+      : (error.message || "Vérification UID impossible");
+    if (playerLookupResult) playerLookupResult.innerHTML = `<p><strong>Pseudo non vérifié.</strong> ${escapeHtml(message)}</p>`;
+    showToast(message);
   } finally {
     playerLookupButton.disabled = false;
     playerLookupButton.textContent = "Vérifier mon UID";
