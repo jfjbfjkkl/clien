@@ -1188,6 +1188,10 @@ const importAstralProducts = async (payload) => {
     const baseFields = astralFieldNames(astralProduct);
     const prices = variations.map((variation) => variation.price).filter(Number.isFinite);
     const retailPrice = prices.length ? Math.min(...prices) : getAstralRetailPrice(baseSupplierPrice, baseCurrency);
+    const hasDirectRechargeFields = Boolean(astralProduct.requires_uid)
+      || baseFields.some((field) => /uid|player|user id|riot id|identifiant|region|server|serveur|platform/.test(field))
+      || variations.some((variation) => variation.requiresPlayerId || variation.requiresRegion);
+    if (authorizedCategory === "jeux" && !hasDirectRechargeFields) return;
     const isDirectRecharge = authorizedCategory === "jeux";
     imported.push({
       id: `product-${astralId}`,
