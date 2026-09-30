@@ -935,7 +935,7 @@ const handleProductsApi = async (request, response, pathname) => {
   const includeHidden = requestUrl.searchParams.get("include_hidden") === "1" && Boolean(getAdminSession(request));
   const visibleProducts = includeHidden
     ? products
-    : products.filter((product) => product.type === "physical" || Boolean(product.photo && product.sourceImageUrl));
+    : products.filter((product) => product.type === "physical" || Boolean(product.photo));
   const productId = pathname.startsWith("/api/products/") ? decodeURIComponent(pathname.replace("/api/products/", "")) : "";
 
   if (request.method === "GET" && pathname === "/api/products") {
@@ -1058,7 +1058,7 @@ const handleCartApi = async (request, response, pathname) => {
   const products = await readJsonFile(productsFile, []);
   const validatedItems = items.map((item) => {
     const product = products.find((candidate) => candidate.id === item.id);
-    if (!product || (product.type === "digital" && (!product.photo || !product.sourceImageUrl))) return null;
+    if (!product || (product.type === "digital" && !product.photo)) return null;
     const variations = Array.isArray(product.variations) ? product.variations : [];
     const variation = variations.find((candidate) => candidate.id === String(item.variationId || ""));
     if (variations.length && !variation) return null;
@@ -1173,7 +1173,7 @@ const importAstralProducts = async (payload) => {
       currency: "FCFA",
       shippingFee: 0,
       media: "media-blue",
-      photo: astralProduct.image_url ? `/api/product-images/product-${astralId}` : "",
+      photo: astralProduct.image_url ? `/api/product-images/product-${astralId}` : "/assets/silverse-logo.png",
       sourceImageUrl: String(astralProduct.image_url || ""),
       category: isDirectRecharge ? "jeux" : "giftcards",
       categoryLabel: isDirectRecharge ? "Recharge directe" : "Carte cadeau",
@@ -1588,7 +1588,7 @@ const handleOrdersApi = async (request, response, pathname) => {
   let changedPriceItem = null;
   const orderItems = items.map((item) => {
     const product = products.find((candidate) => candidate.id === item.id);
-    if (!product || (product.type === "digital" && (!product.photo || !product.sourceImageUrl))) return null;
+    if (!product || (product.type === "digital" && !product.photo)) return null;
     const variations = Array.isArray(product.variations) ? product.variations : [];
     const variation = variations.find((candidate) => candidate.id === String(item.variationId || ""));
     if (variations.length && !variation) return null;
