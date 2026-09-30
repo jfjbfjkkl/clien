@@ -15279,3 +15279,74 @@ body[data-page="cart"] .page-hero {
   .product-detail-page .product-gallery-main { min-height: 270px; }
   .digital-code-list article { grid-template-columns: 1fr; }
 }
+
+/* Mobile-only interaction stability: viewport menu, stable navbar and native one-tap links. */
+@media (max-width: 900px) {
+  body.is-loaded,
+  body.is-leaving {
+    transform: none;
+  }
+
+  body.is-loaded {
+    transition-property: opacity;
+  }
+
+  .site-header {
+    position: sticky;
+    top: 0;
+    animation: none;
+    transform: none;
+    transition: none;
+    background: #ffffff;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    backface-visibility: hidden;
+  }
+
+  .mobile-menu-shell {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    max-width: 100vw;
+    overflow: hidden;
+    overscroll-behavior: none;
+    touch-action: none;
+  }
+
+  .mobile-menu-backdrop {
+    position: fixed;
+    inset: 0;
+  }
+
+  .mobile-menu-drawer {
+    position: fixed;
+    top: 0;
+    bottom: auto;
+    left: 0;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100vh;
+    max-height: 100dvh;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 0 18px 18px 0;
+    padding-top: max(16px, env(safe-area-inset-top));
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 900px) and (hover: none) {
+  .brand:hover,
+  .home-page .home-gaming-section .section-link:hover span,
+  .home-mobile-universe-heading a:hover span,
+  .home-page [data-reveal].is-visible .home-game-card:hover,
+  .home-page .home-gaming-section .home-game-card:hover i {
+    transform: none;
+  }
+}

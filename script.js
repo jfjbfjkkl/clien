@@ -523,8 +523,12 @@ const renderGamingProducts = (products, total = products.length) => {
     gamingLoadMore.textContent = gamingLoading ? "Chargement…" : "Charger plus de produits";
   }
   if (homeGrid) {
-    homeGrid.innerHTML = apiProducts.length
-      ? apiProducts.slice(0, 3).map((product, index) => `<a class="home-game-card ${index === 0 ? "home-game-featured" : ""}" href="product.html?id=${product.id}"><span>${product.name}</span><p>${product.short}</p><i>Découvrir →</i></a>`).join("")
+    const freeFireMena = apiProducts.find((product) => /free\s*fire\s*\(mena\)/i.test(product.name));
+    const homeProducts = freeFireMena && window.matchMedia("(max-width: 900px)").matches
+      ? [freeFireMena, ...apiProducts.filter((product) => product.id !== freeFireMena.id)].slice(0, 3)
+      : apiProducts.slice(0, 3);
+    homeGrid.innerHTML = homeProducts.length
+      ? homeProducts.map((product, index) => `<a class="home-game-card ${index === 0 ? "home-game-featured" : ""}" href="product.html?id=${encodeURIComponent(product.id)}"><span>${escapeHtml(product.name)}</span><p>${escapeHtml(product.short)}</p><i>Découvrir →</i></a>`).join("")
       : `<div class="catalog-empty"><strong>Catalogue en attente</strong><p>Les jeux disponibles vont apparaître ici.</p></div>`;
   }
 };
@@ -1522,6 +1526,13 @@ const lockBodyScroll = () => {
   lockedScrollY = window.scrollY;
   document.documentElement.style.overflow = "hidden";
   document.body.style.overflow = "hidden";
+  if (window.matchMedia("(max-width: 900px)").matches) {
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${lockedScrollY}px`;
+    document.body.style.right = "0";
+    document.body.style.left = "0";
+    document.body.style.width = "100%";
+  }
   document.body.classList.add("modal-open");
 };
 
@@ -1529,6 +1540,11 @@ const unlockBodyScroll = (restoreScroll = true) => {
   document.body.classList.remove("modal-open");
   document.documentElement.style.overflow = "";
   document.body.style.overflow = "";
+  document.body.style.position = "";
+  document.body.style.top = "";
+  document.body.style.right = "";
+  document.body.style.left = "";
+  document.body.style.width = "";
   if (restoreScroll) window.scrollTo(0, lockedScrollY);
 };
 
@@ -2263,6 +2279,7 @@ localLinks.forEach((link) => {
     const samePath = url.pathname === window.location.pathname;
     if (url.origin !== window.location.origin || (samePath && url.hash)) return;
     if (samePath) return;
+    if (window.matchMedia("(max-width: 900px)").matches) return;
     event.preventDefault();
     document.body.classList.add("is-leaving");
     window.setTimeout(() => {
