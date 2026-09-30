@@ -1131,30 +1131,6 @@ const astralFieldNames = (product, variation = null) => [
   ...(Array.isArray(variation?.required_fields) ? variation.required_fields : [])
 ].map((field) => normalizeSearchText(typeof field === "string" ? field : field?.name || field?.key));
 
-// Le catalogue public est volontairement limité aux familles validées par la boutique.
-// Les expressions sont ancrées au début pour éviter les produits tiers qui ne font
-// que mentionner une marque dans leur nom.
-const authorizedAstralCatalog = [
-  { category: "jeux", pattern: /^mobile legends\b/i },
-  { category: "jeux", pattern: /^arena breakout\b/i },
-  { category: "jeux", pattern: /^asphalt\b/i },
-  { category: "jeux", pattern: /^league of legends\b/i },
-  { category: "jeux", pattern: /^state of survival\b/i },
-  { category: "giftcards", pattern: /^nintendo\b/i },
-  { category: "giftcards", pattern: /^fortnite\b/i },
-  { category: "giftcards", pattern: /^razer gold\b/i, exclude: /loaded accounts?/i },
-  { category: "giftcards", pattern: /^xbox\b/i, exclude: /loaded accounts?/i },
-  { category: "giftcards", pattern: /^apple\b/i },
-  { category: "giftcards", pattern: /^google play\b/i },
-  { category: "giftcards", pattern: /^amazon\b/i }
-];
-
-const getAuthorizedAstralCategory = (name) => {
-  const value = String(name || "").trim();
-  const match = authorizedAstralCatalog.find((rule) => rule.pattern.test(value) && !rule.exclude?.test(value));
-  return match?.category || "";
-};
-
 const importAstralProducts = async (payload) => {
   const source = extractAstralProducts(payload);
   const existingProducts = await readJsonFile(productsFile, []);
@@ -1165,8 +1141,6 @@ const importAstralProducts = async (payload) => {
     const astralId = astralProduct.id || astralProduct.product_id;
     if (!astralId) return;
     const baseName = String(astralProduct.name || astralProduct.title || `Produit digital ${astralId}`);
-    const authorizedCategory = getAuthorizedAstralCategory(baseName);
-    if (!authorizedCategory) return;
     const sourceVariations = Array.isArray(astralProduct.variations) ? astralProduct.variations : [];
     const variations = sourceVariations.map((variation) => {
       const supplierPrice = getAstralProductPrice(variation);
@@ -1188,11 +1162,9 @@ const importAstralProducts = async (payload) => {
     const baseFields = astralFieldNames(astralProduct);
     const prices = variations.map((variation) => variation.price).filter(Number.isFinite);
     const retailPrice = prices.length ? Math.min(...prices) : getAstralRetailPrice(baseSupplierPrice, baseCurrency);
-    const hasDirectRechargeFields = Boolean(astralProduct.requires_uid)
+    const isDirectRecharge = Boolean(astralProduct.requires_uid)
       || baseFields.some((field) => /uid|player|user id|riot id|identifiant|region|server|serveur|platform/.test(field))
       || variations.some((variation) => variation.requiresPlayerId || variation.requiresRegion);
-    if (authorizedCategory === "jeux" && !hasDirectRechargeFields) return;
-    const isDirectRecharge = authorizedCategory === "jeux";
     imported.push({
       id: `product-${astralId}`,
       name: baseName,
