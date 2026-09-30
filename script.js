@@ -1401,9 +1401,12 @@ const renderProductDetail = () => {
 
 const updateCartCount = () => {
   count = cart.reduce((total, item) => total + (item.qty || 1), 0);
+  const total = cart.reduce((sum, item) => sum + (Number(item.rawPrice || 0) * Number(item.qty || 1)) + Number(item.shippingFee || 0), 0);
   if (cartCount) cartCount.textContent = String(count);
   cartPageSummaries.forEach((summary) => {
-    summary.textContent = `${count} article${count > 1 ? "s" : ""} dans le panier`;
+    summary.textContent = count
+      ? `${count} article${count > 1 ? "s" : ""} · Total confirmé : ${formatMoney(total)}`
+      : "0 article dans le panier";
   });
 };
 
@@ -1486,16 +1489,23 @@ const renderCartPage = () => {
 const validateCartWithBackend = async () => {
   if (!cart.length) {
     refreshCheckoutDelivery();
-    return;
+    return false;
   }
+  const previousPrices = new Map(cart.map((item) => [`${item.id}:${item.variationId || "base"}`, Number(item.rawPrice || 0)]));
+  let priceChanged = false;
   try {
     const response = await fetch("/api/cart/validate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ items: cart.map((item) => ({ id: item.id, variationId: item.variationId || "", qty: item.qty || 1 })) })
     });
-    if (!response.ok) return;
+    if (!response.ok) return false;
     const data = await response.json();
+    priceChanged = data.items.some((item) => {
+      const key = `${item.id}:${item.variationId || "base"}`;
+      const previous = previousPrices.get(key);
+      return Number.isFinite(previous) && previous > 0 && Math.abs(previous - Number(item.price || 0)) >= 0.01;
+    });
     cart = data.items.map((item) => ({ ...normalizeBackendProduct(item), price: item.priceLabel || item.price, variationId: item.variationId || "", cartKey: `${item.id}:${item.variationId || "base"}`, qty: item.qty }));
     saveCart();
     updateCartCount();
@@ -1505,6 +1515,7 @@ const validateCartWithBackend = async () => {
   } finally {
     refreshCheckoutDelivery();
   }
+  return priceChanged;
 };
 
 const renderFavoritesPage = () => {
@@ -2218,6 +2229,11 @@ document.querySelectorAll("[data-checkout-submit]").forEach((button) => {
     button.textContent = "Connexion à Money Fusion...";
 
     try {
+      const priceChanged = await validateCartWithBackend();
+      if (priceChanged) {
+        showToast("Le prix fournisseur a changé. Le nouveau total est affiché : confirmez à nouveau pour payer.");
+        return;
+      }
       await refreshCustomerSession();
       const configResponse = await fetch("/api/moneyfusion/config");
       const config = await configResponse.json();
@@ -2229,7 +2245,7 @@ document.querySelectorAll("[data-checkout-submit]").forEach((button) => {
         body: JSON.stringify({
           customer: { email, phone, firstName, lastName, address, city, country, paymentMethod, notes, deliveryOption, latitude, longitude },
           fulfillment: { playerId, region, nickname },
-          items: cart.map((item) => ({ id: item.id, variationId: item.variationId || "", qty: item.qty || 1 }))
+          items: cart.map((item) => ({ id: item.id, variationId: item.variationId || "", qty: item.qty || 1, expectedUnitPrice: Number(item.rawPrice || 0) }))
         })
       });
 

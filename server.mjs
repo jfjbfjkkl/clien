@@ -1131,6 +1131,30 @@ const astralFieldNames = (product, variation = null) => [
   ...(Array.isArray(variation?.required_fields) ? variation.required_fields : [])
 ].map((field) => normalizeSearchText(typeof field === "string" ? field : field?.name || field?.key));
 
+// Le catalogue public est volontairement limité aux familles validées par la boutique.
+// Les expressions sont ancrées au début pour éviter les produits tiers qui ne font
+// que mentionner une marque dans leur nom.
+const authorizedAstralCatalog = [
+  { category: "jeux", pattern: /^mobile legends\b/i },
+  { category: "jeux", pattern: /^arena breakout\b/i },
+  { category: "jeux", pattern: /^asphalt\b/i },
+  { category: "jeux", pattern: /^league of legends\b/i },
+  { category: "jeux", pattern: /^state of survival\b/i },
+  { category: "giftcards", pattern: /^nintendo\b/i },
+  { category: "giftcards", pattern: /^fortnite\b/i },
+  { category: "giftcards", pattern: /^razer gold\b/i, exclude: /loaded accounts?/i },
+  { category: "giftcards", pattern: /^xbox\b/i, exclude: /loaded accounts?/i },
+  { category: "giftcards", pattern: /^apple\b/i },
+  { category: "giftcards", pattern: /^google play\b/i },
+  { category: "giftcards", pattern: /^amazon\b/i }
+];
+
+const getAuthorizedAstralCategory = (name) => {
+  const value = String(name || "").trim();
+  const match = authorizedAstralCatalog.find((rule) => rule.pattern.test(value) && !rule.exclude?.test(value));
+  return match?.category || "";
+};
+
 const importAstralProducts = async (payload) => {
   const source = extractAstralProducts(payload);
   const existingProducts = await readJsonFile(productsFile, []);
@@ -1141,6 +1165,8 @@ const importAstralProducts = async (payload) => {
     const astralId = astralProduct.id || astralProduct.product_id;
     if (!astralId) return;
     const baseName = String(astralProduct.name || astralProduct.title || `Produit digital ${astralId}`);
+    const authorizedCategory = getAuthorizedAstralCategory(baseName);
+    if (!authorizedCategory) return;
     const sourceVariations = Array.isArray(astralProduct.variations) ? astralProduct.variations : [];
     const variations = sourceVariations.map((variation) => {
       const supplierPrice = getAstralProductPrice(variation);
@@ -1162,9 +1188,7 @@ const importAstralProducts = async (payload) => {
     const baseFields = astralFieldNames(astralProduct);
     const prices = variations.map((variation) => variation.price).filter(Number.isFinite);
     const retailPrice = prices.length ? Math.min(...prices) : getAstralRetailPrice(baseSupplierPrice, baseCurrency);
-    const isDirectRecharge = Boolean(astralProduct.requires_uid)
-      || baseFields.some((field) => /uid|player|user id|identifiant|region|server|serveur/.test(field))
-      || variations.some((variation) => variation.requiresPlayerId || variation.requiresRegion);
+    const isDirectRecharge = authorizedCategory === "jeux";
     imported.push({
       id: `product-${astralId}`,
       name: baseName,
@@ -1207,6 +1231,25 @@ const importAstralProducts = async (payload) => {
   };
 };
 
+const fetchFullAstralCatalog = async () => {
+  const perPage = 200;
+  const products = [];
+  let page = 1;
+  let lastPage = 1;
+
+  do {
+    const result = await astralRequest("/products", { query: { per_page: perPage, page } });
+    const batch = extractAstralProducts(result.payload);
+    products.push(...batch);
+    const data = getAstralPayloadData(result.payload);
+    const total = Number(data?.total ?? result.payload?.total ?? products.length);
+    lastPage = Math.max(1, Number(data?.last_page ?? result.payload?.last_page) || Math.ceil(total / perPage));
+    page += 1;
+  } while (page <= lastPage && page <= 20);
+
+  return { data: products, total: products.length, current_page: 1, last_page: lastPage };
+};
+
 let astralCatalogSyncPromise = null;
 let astralCatalogSyncedAt = 0;
 
@@ -1217,8 +1260,8 @@ const syncAstralCatalog = async ({ force = false } = {}) => {
   }
   if (astralCatalogSyncPromise) return astralCatalogSyncPromise;
   astralCatalogSyncPromise = (async () => {
-    const result = await astralRequest("/products", { query: { per_page: 200 } });
-    const imported = await importAstralProducts(result.payload);
+    const payload = await fetchFullAstralCatalog();
+    const imported = await importAstralProducts(payload);
     astralCatalogSyncedAt = Date.now();
     return { ...imported, syncedAt: new Date(astralCatalogSyncedAt).toISOString() };
   })();
@@ -1566,6 +1609,7 @@ const handleOrdersApi = async (request, response, pathname) => {
   }
   const products = await readJsonFile(productsFile, []);
   const items = Array.isArray(body.items) ? body.items : [];
+  let changedPriceItem = null;
   const orderItems = items.map((item) => {
     const product = products.find((candidate) => candidate.id === item.id);
     if (!product || (product.type === "digital" && (!product.photo || !product.sourceImageUrl))) return null;
@@ -1578,6 +1622,10 @@ const handleOrdersApi = async (request, response, pathname) => {
     const astralMeta = getAstralProductMeta(product);
     const fulfillment = body.fulfillment?.[product.id] || body.fulfillment || {};
     const unitPrice = Number(variation?.price ?? product.price);
+    const expectedUnitPrice = Number(item.expectedUnitPrice);
+    if (Number.isFinite(expectedUnitPrice) && Math.abs(expectedUnitPrice - unitPrice) >= 0.01) {
+      changedPriceItem ||= variation ? `${product.name} — ${variation.name}` : product.name;
+    }
     return {
       id: product.id,
       name: variation ? `${product.name} — ${variation.name}` : product.name,
@@ -1600,6 +1648,14 @@ const handleOrdersApi = async (request, response, pathname) => {
       requiresRegion: variation?.requiresRegion ?? astralMeta?.requiresRegion ?? false
     };
   }).filter(Boolean);
+
+  if (changedPriceItem) {
+    sendJson(response, 409, {
+      error: `Le prix de ${changedPriceItem} vient d’être actualisé. Le paiement n’a pas été lancé : vérifiez le nouveau total puis confirmez à nouveau.`,
+      code: "PRICE_CHANGED"
+    });
+    return true;
+  }
 
   if (!orderItems.length) {
     sendJson(response, 400, { error: "La commande ne contient aucun produit valide." });

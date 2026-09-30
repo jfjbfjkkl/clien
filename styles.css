@@ -14101,6 +14101,7 @@ button.is-confirmed,
 .delivery-commitment small { color: #c9cbd0; font-size: .63rem; font-weight: 550; }
 .checkout-pay-button { min-height: 52px !important; background: linear-gradient(135deg, #d9af5a, #b67d25) !important; box-shadow: 0 14px 28px rgba(183,126,37,.24) !important; }
 .checkout-security-note { margin: -5px 0 0; color: #7a766f; font-size: .66rem; text-align: center; }
+.checkout-price-guarantee { margin: 12px 0 0; color: #6f6a61; font-size: .7rem; line-height: 1.55; }
 .checkout-summary-panel { position: sticky; top: 104px; align-self: start; }
 .checkout-promise { display: grid; gap: 5px; margin: 20px 0; padding: 15px; border: 1px solid #e5d3af; border-radius: 13px; background: #fff8e9; }
 .checkout-promise strong { color: #6f4c16; font-size: .78rem; }
