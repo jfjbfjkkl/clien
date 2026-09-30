@@ -1120,6 +1120,17 @@ const findLocalAstralMatch = (localProducts, astralProduct) => {
 
 const getAstralProductPrice = (product) => Number(product.price || product.amount || product.sale_price || product.cost || 0);
 
+const hasOfficialAstralArtwork = (value) => {
+  try {
+    const url = new URL(String(value || ""));
+    return url.protocol === "https:" && url.hostname !== "cdn.simpleicons.org";
+  } catch {
+    return false;
+  }
+};
+
+const isTestCatalogProduct = (name) => /\b(?:test|demo|sandbox|catalogue test)\b/i.test(String(name || ""));
+
 const getAstralRetailPrice = (price, currency = "USD") => {
   const supplierPrice = Number(price || 0);
   const xofCost = String(currency).toUpperCase() === "XOF" ? supplierPrice : supplierPrice * astralUsdToXofRate;
@@ -1141,6 +1152,8 @@ const importAstralProducts = async (payload) => {
     const astralId = astralProduct.id || astralProduct.product_id;
     if (!astralId) return;
     const baseName = String(astralProduct.name || astralProduct.title || `Produit digital ${astralId}`);
+    const sourceImageUrl = String(astralProduct.image_url || "").trim();
+    if (isTestCatalogProduct(baseName) || !hasOfficialAstralArtwork(sourceImageUrl)) return;
     const sourceVariations = Array.isArray(astralProduct.variations) ? astralProduct.variations : [];
     const variations = sourceVariations.map((variation) => {
       const supplierPrice = getAstralProductPrice(variation);
@@ -1153,7 +1166,7 @@ const importAstralProducts = async (payload) => {
         supplierPrice,
         supplierCurrency,
         requiredFields: fields,
-        requiresPlayerId: Boolean(astralProduct.requires_uid) || fields.some((field) => /uid|player|user id|identifiant/.test(field)),
+        requiresPlayerId: Boolean(astralProduct.requires_uid) || fields.some((field) => /uid|player|user id|account id|open id|riot id|identifiant/.test(field)),
         requiresRegion: fields.some((field) => /region|server|serveur/.test(field))
       };
     }).filter((variation) => variation.id);
@@ -1173,8 +1186,8 @@ const importAstralProducts = async (payload) => {
       currency: "FCFA",
       shippingFee: 0,
       media: "media-blue",
-      photo: astralProduct.image_url ? `/api/product-images/product-${astralId}` : "/assets/silverse-logo.png",
-      sourceImageUrl: String(astralProduct.image_url || ""),
+      photo: `/api/product-images/product-${astralId}`,
+      sourceImageUrl,
       category: isDirectRecharge ? "jeux" : "giftcards",
       categoryLabel: isDirectRecharge ? "Recharge directe" : "Carte cadeau",
       availability: "Disponible",
@@ -1189,7 +1202,7 @@ const importAstralProducts = async (payload) => {
       supplierPrice: baseSupplierPrice,
       supplierCurrency: baseCurrency,
       variations,
-      requiresPlayerId: Boolean(astralProduct.requires_uid) || baseFields.some((field) => /uid|player|user id|identifiant/.test(field)),
+      requiresPlayerId: Boolean(astralProduct.requires_uid) || baseFields.some((field) => /uid|player|user id|account id|open id|riot id|identifiant/.test(field)),
       requiresRegion: baseFields.some((field) => /region|server|serveur/.test(field)),
       requiredFields: baseFields,
       short: variations.length ? `${variations.length} option${variations.length > 1 ? "s" : ""} disponible${variations.length > 1 ? "s" : ""}, à partir de ${retailPrice.toLocaleString("fr-FR")} FCFA.` : `Recharge ${baseName} livrée après confirmation du paiement.`,
@@ -1620,8 +1633,8 @@ const handleOrdersApi = async (request, response, pathname) => {
         region: String(fulfillment.region || fulfillment.server || "").trim(),
         nickname: String(fulfillment.nickname || "").trim()
       } : undefined,
-      requiresPlayerId: variation?.requiresPlayerId ?? astralMeta?.requiresPlayerId ?? false,
-      requiresRegion: variation?.requiresRegion ?? astralMeta?.requiresRegion ?? false
+      requiresPlayerId: Boolean(variation?.requiresPlayerId || astralMeta?.requiresPlayerId),
+      requiresRegion: Boolean(variation?.requiresRegion || astralMeta?.requiresRegion)
     };
   }).filter(Boolean);
 

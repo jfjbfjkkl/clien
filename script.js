@@ -452,7 +452,7 @@ const productCardTemplate = (product) => {
     <article class="market-product-card shop-product-card" role="link" tabindex="0" data-product-link="product.html?id=${id}" data-catalog-product data-category="${escapeHtml(product.categorySlug)}" data-brand="${brandSlug}" data-price="${product.rawPrice}" data-rating="${Number(product.rating || 0)}" data-promo="${isPromo}" data-stock="${isAvailable}" data-product-id="${escapeHtml(product.id)}" data-product-name="${escapeHtml(product.name)}" data-product-price="${escapeHtml(product.price)}" data-product-media="${escapeHtml(product.media)}" data-product-photo="${escapeHtml(product.photo || "")}">
       ${renderProductImage(product)}
       <button class="favorite-toggle" type="button" aria-label="Ajouter aux favoris" data-favorite-product>♡</button>
-      <p class="market-brand">SILVERSE SHOP</p>
+      <p class="market-brand">${product.categorySlug === "jeux" ? "TOP-UP DIRECT" : "SILVERSE SHOP"}</p>
       <h3>${escapeHtml(product.name)}</h3>
       <p class="market-product-description">${escapeHtml(product.short)}</p>
       <p class="market-availability ${isAvailable ? "is-available" : "is-unavailable"}">${escapeHtml(product.availability)}</p>
