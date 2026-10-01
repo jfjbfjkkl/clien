@@ -639,15 +639,21 @@ const loadBackendProducts = async () => {
     return;
   }
   if (currentPage === "index.html") {
-    const [giftCards, directRecharges] = await Promise.all([
+    const mobileViewport = window.matchMedia("(max-width: 900px)").matches;
+    const [giftCards, directRecharges, freeFireMena] = await Promise.all([
       fetchProductPage({ type: "digital", category: "giftcards", limit: 24 }),
-      fetchProductPage({ type: "digital", category: "jeux", limit: 6 })
+      fetchProductPage({ type: "digital", category: "jeux", limit: 6 }),
+      mobileViewport
+        ? fetchProductPage({ type: "digital", category: "jeux", query: "Free Fire (MENA)", limit: 1 })
+        : Promise.resolve({ products: [] })
     ]);
-    const homeProducts = [...giftCards.products, ...directRecharges.products];
+    const featuredGames = [...freeFireMena.products, ...directRecharges.products]
+      .filter((product, index, products) => products.findIndex((candidate) => candidate.id === product.id) === index);
+    const homeProducts = [...giftCards.products, ...featuredGames];
     addProductsToCatalog(homeProducts);
     renderHomeApiProducts(homeProducts);
     renderHomeDigitalShowcase(giftCards.products);
-    renderGamingProducts(directRecharges.products, directRecharges.total || directRecharges.products.length);
+    renderGamingProducts(featuredGames, directRecharges.total || featuredGames.length);
     return;
   }
 
@@ -1131,7 +1137,8 @@ const refreshCheckoutDelivery = () => {
   if (!checkoutForm) return;
   const hasPhysical = cart.some((item) => item.type === "physical");
   const hasDigital = cart.some((item) => item.type === "digital" || item.categorySlug === "jeux" || item.categorySlug === "giftcards");
-  const hasGame = cart.some((item) => item.categorySlug === "jeux");
+  const mobileViewport = window.matchMedia("(max-width: 900px)").matches;
+  const hasGame = cart.some((item) => item.categorySlug === "jeux" && (!mobileViewport || item.requiresPlayerId === true));
   const cartReady = cart.length > 0 && cart.every((item) => item.type === "physical" || item.type === "digital");
   if (checkoutPayButton && !checkoutPayButton.dataset.submitting) {
     checkoutPayButton.disabled = !cartReady;
@@ -1142,7 +1149,7 @@ const refreshCheckoutDelivery = () => {
   const playerIdField = checkoutForm.querySelector('[name="playerId"]');
   if (playerIdField) playerIdField.required = hasGame;
   if (hasGame) {
-    const game = cart.find((item) => item.categorySlug === "jeux");
+    const game = cart.find((item) => item.categorySlug === "jeux" && (!mobileViewport || item.requiresPlayerId === true));
     const regionField = checkoutForm.querySelector('[name="region"]');
     if (regionField && !regionField.value) regionField.value = inferGameRegion(game?.name || "");
   }
@@ -2127,7 +2134,8 @@ orderStatusForm?.addEventListener("submit", async (event) => {
 const verifyCheckoutPlayer = async () => {
   const form = playerLookupButton.closest("form");
   const playerId = form?.querySelector('[name="playerId"]')?.value.trim() || "";
-  const game = cart.find((item) => item.categorySlug === "jeux");
+  const mobileViewport = window.matchMedia("(max-width: 900px)").matches;
+  const game = cart.find((item) => item.categorySlug === "jeux" && (!mobileViewport || item.requiresPlayerId === true));
   const gameName = game?.name || "";
   const region = inferGameRegion(gameName);
   const regionField = form?.querySelector('[name="region"]');
@@ -2203,7 +2211,8 @@ document.querySelectorAll("[data-checkout-submit]").forEach((button) => {
     const paymentMethod = form?.querySelector('[name="paymentMethod"]')?.value || "";
     const notes = form?.querySelector('[name="notes"]')?.value.trim() || "";
     const hasPhysical = cart.some((item) => item.type === "physical");
-    const hasGame = cart.some((item) => item.categorySlug === "jeux");
+    const mobileViewport = window.matchMedia("(max-width: 900px)").matches;
+    const hasGame = cart.some((item) => item.categorySlug === "jeux" && (!mobileViewport || item.requiresPlayerId === true));
     const deliveryOption = form?.querySelector('[name="deliveryOption"]:checked')?.value || "address_now";
     const latitude = form?.querySelector('[name="latitude"]')?.value || "";
     const longitude = form?.querySelector('[name="longitude"]')?.value || "";
