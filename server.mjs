@@ -39,6 +39,7 @@ const astralMode = process.env.ASTRAL_MODE || "sandbox";
 const astralUsdToXofRate = Math.max(1, Number(process.env.ASTRAL_USD_TO_XOF_RATE || 600));
 const astralMarkupPercent = Math.max(0, Number(process.env.ASTRAL_MARKUP_PERCENT || 12));
 const astralCatalogSyncIntervalMs = Math.max(60, Number(process.env.ASTRAL_CATALOG_SYNC_SECONDS || 60)) * 1000;
+const astralOrderRetryIntervalMs = Math.max(60, Number(process.env.ASTRAL_ORDER_RETRY_SECONDS || 300)) * 1000;
 const adminEmail = String(process.env.ADMIN_EMAIL || "").trim().toLowerCase();
 const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH || "";
 const adminSessionDurationMs = Math.max(15, Number(process.env.ADMIN_SESSION_MINUTES || 480)) * 60_000;
@@ -565,6 +566,10 @@ const mapAstralState = (state) => {
   if (["failed", "cancelled", "canceled", "rejected"].includes(normalized)) return "cancelled";
   return "processing";
 };
+
+const astralSubmittedStates = new Set(["accepted", "processing", "running", "pending", "pending_balance", "queued", "shipped", "sent", "delivered", "completed", "success", "done"]);
+const isAstralItemSubmitted = (item) => Boolean(item.fulfillment?.astralOrderId)
+  || astralSubmittedStates.has(String(item.fulfillment?.state || "").toLowerCase());
 
 const getAstralProductMeta = (product) => product.provider === "astral" || product.astral
   ? {
@@ -1401,17 +1406,66 @@ const buildAstralOrderPayload = (order, item, customer) => {
   };
 };
 
-const processAstralFulfillments = async (order) => {
-  const astralItems = order.items.filter((item) => item.provider === "astral");
+const processAstralFulfillments = async (order, { force = false } = {}) => {
+  const astralItems = order.items.filter((item) => item.provider === "astral" && !isAstralItemSubmitted(item));
   if (!astralItems.length) return order;
 
   order.astral = order.astral || { mode: astralMode, orders: [] };
 
   for (const item of astralItems) {
+    const previousFulfillment = item.fulfillment || {};
+    const lastAttemptAt = previousFulfillment.lastAttemptAt ? new Date(previousFulfillment.lastAttemptAt).getTime() : 0;
+    if (!force && lastAttemptAt && Date.now() - lastAttemptAt < astralOrderRetryIntervalMs) continue;
+
     const payload = buildAstralOrderPayload(order, item, order.customer || {});
-    item.fulfillment = { ...(item.fulfillment || {}), provider: "astral", partnerReference: payload.partner_reference };
+    item.fulfillment = {
+      ...previousFulfillment,
+      provider: "astral",
+      partnerReference: payload.partner_reference,
+      lastAttemptAt: new Date().toISOString()
+    };
+
+    if ((item.requiresPlayerId && !item.fulfillment.playerId) || (item.requiresRegion && !item.fulfillment.region)) {
+      item.fulfillment = {
+        ...item.fulfillment,
+        state: "awaiting_customer_data",
+        error: "Informations joueur requises avant l’envoi de la commande."
+      };
+      continue;
+    }
 
     try {
+      if (previousFulfillment.partnerReference) {
+        try {
+          const existingResult = await astralRequest("/order/get-order", {
+            query: { order_id: payload.partner_reference },
+            partnerReference: payload.partner_reference
+          });
+          const existingData = getAstralPayloadData(existingResult.payload) || {};
+          const existingState = existingData.state || existingData.status || "accepted";
+          const existingFulfillment = {
+            ...item.fulfillment,
+            astralOrderId: existingData.order_id || existingData.astral_order_id || item.fulfillment.astralOrderId,
+            state: existingState,
+            total: existingData.total,
+            currency: existingData.currency,
+            response: existingData,
+            error: undefined,
+            syncError: undefined,
+            acceptedAt: item.fulfillment.acceptedAt || new Date().toISOString()
+          };
+          item.fulfillment = existingFulfillment;
+          order.astral.orders.push(existingFulfillment);
+          appendOrderEvent(order, mapAstralState(existingState), `Commande digitale retrouvée : ${existingState}.`, "SILVERSE SHOP");
+          continue;
+        } catch (lookupError) {
+          if (lookupError.statusCode !== 404) {
+            item.fulfillment = { ...item.fulfillment, syncError: lookupError.message };
+            continue;
+          }
+        }
+      }
+
       const result = await astralRequest("/order/add-order", {
         method: "POST",
         body: payload,
@@ -1420,21 +1474,22 @@ const processAstralFulfillments = async (order) => {
       const data = getAstralPayloadData(result.payload) || {};
       const astralStatus = mapAstralState(data.state);
       const fulfillment = {
-        provider: "astral",
-        partnerReference: payload.partner_reference,
+        ...item.fulfillment,
         astralOrderId: data.order_id || data.astral_order_id,
         state: data.state || "accepted",
         total: data.total,
         currency: data.currency,
-        response: data
+        response: data,
+        error: undefined,
+        syncError: undefined,
+        acceptedAt: new Date().toISOString()
       };
       item.fulfillment = fulfillment;
       order.astral.orders.push(fulfillment);
-      appendOrderEvent(order, astralStatus, `Commande Astral ${data.order_id || payload.partner_reference} : ${data.state || "accepted"}.`, "Astral4Gamer");
+      appendOrderEvent(order, astralStatus, `Commande digitale ${data.order_id || payload.partner_reference} : ${data.state || "accepted"}.`, "SILVERSE SHOP");
     } catch (error) {
       const fulfillment = {
-        provider: "astral",
-        partnerReference: payload.partner_reference,
+        ...item.fulfillment,
         state: error.statusCode === 503 ? "configuration_required" : "failed",
         error: error.message,
         response: error.payload || null
@@ -1442,9 +1497,9 @@ const processAstralFulfillments = async (order) => {
       item.fulfillment = fulfillment;
       order.astral.orders.push(fulfillment);
       appendOrderEvent(order, "pending", error.statusCode === 503
-        ? "Commande digitale en attente : la clé Astral n'est pas configurée sur le serveur."
-        : `Commande Astral non envoyée : ${error.message}`,
-        "Astral4Gamer");
+        ? "Commande digitale en attente : le service de livraison n'est pas configuré sur le serveur."
+        : `Commande digitale en attente : ${error.message}`,
+        "SILVERSE SHOP");
     }
   }
 
@@ -1452,7 +1507,9 @@ const processAstralFulfillments = async (order) => {
 };
 
 const syncOrderWithAstral = async (order) => {
-  const astralItems = order.items.filter((item) => item.fulfillment?.provider === "astral" && item.fulfillment?.partnerReference);
+  const astralItems = order.items.filter((item) => item.fulfillment?.provider === "astral"
+    && item.fulfillment?.partnerReference
+    && isAstralItemSubmitted(item));
   if (!astralItems.length || !astralApiKey) return order;
 
   for (const item of astralItems) {
@@ -1474,6 +1531,37 @@ const syncOrderWithAstral = async (order) => {
   }
 
   return order;
+};
+
+let astralOrderReconciliationRunning = false;
+
+const reconcilePaidAstralOrders = async () => {
+  if (!astralApiKey || astralOrderReconciliationRunning) return;
+  astralOrderReconciliationRunning = true;
+  try {
+    const balanceResult = await astralRequest("/get-balance");
+    const balance = getAstralPayloadData(balanceResult.payload) || {};
+    const walletStatus = String(balance.wallet_status || balance.wallet?.status || "").toLowerCase();
+    const apiStatus = String(balance.api_status || "").toLowerCase();
+    if (["frozen", "blocked", "disabled", "inactive"].includes(walletStatus)) return;
+    if (apiStatus && !["active", "enabled", "ok"].includes(apiStatus)) return;
+
+    const orders = await readJsonFile(ordersFile, []);
+    let changed = false;
+    for (const order of orders) {
+      if (order.payment?.status !== "succeeded") continue;
+      const hasRetryableItem = order.items.some((item) => item.provider === "astral" && !isAstralItemSubmitted(item));
+      if (!hasRetryableItem) continue;
+      const before = JSON.stringify(order.items);
+      await processAstralFulfillments(order);
+      if (JSON.stringify(order.items) !== before) changed = true;
+    }
+    if (changed) await writeJsonFile(ordersFile, orders);
+  } catch {
+    // Une indisponibilité du fournisseur ne doit jamais interrompre le serveur.
+  } finally {
+    astralOrderReconciliationRunning = false;
+  }
 };
 
 const handleOrdersApi = async (request, response, pathname) => {
@@ -1538,6 +1626,44 @@ const handleOrdersApi = async (request, response, pathname) => {
     return true;
   }
 
+  if (request.method === "PATCH" && orderId && pathname.endsWith("/fulfillment")) {
+    if (!requireStrictAdmin(request, response)) return true;
+    const body = await parseBody(request);
+    const orders = await readJsonFile(ordersFile, []);
+    const index = orders.findIndex((item) => item.id === orderId || item.trackingNumber === orderId);
+    if (index === -1) {
+      sendJson(response, 404, { error: "Commande introuvable." });
+      return true;
+    }
+    const item = orders[index].items.find((entry) => entry.provider === "astral" && entry.id === String(body.itemId || ""));
+    if (!item) {
+      sendJson(response, 404, { error: "Article numérique introuvable dans cette commande." });
+      return true;
+    }
+    if (isAstralItemSubmitted(item)) {
+      sendJson(response, 409, { error: "Cet article a déjà été transmis au service de livraison." });
+      return true;
+    }
+    item.fulfillment = {
+      ...(item.fulfillment || {}),
+      playerId: String(body.playerId || "").trim().slice(0, 120),
+      region: String(body.region || "").trim().slice(0, 80),
+      nickname: String(body.nickname || "").trim().slice(0, 120),
+      error: undefined,
+      lastAttemptAt: undefined
+    };
+    if ((item.requiresPlayerId && !item.fulfillment.playerId) || (item.requiresRegion && !item.fulfillment.region)) {
+      sendJson(response, 422, { error: "UID et région requis pour transmettre cet article." });
+      return true;
+    }
+    if (orders[index].payment?.status === "succeeded") {
+      await processAstralFulfillments(orders[index], { force: true });
+    }
+    await writeJsonFile(ordersFile, orders);
+    sendJson(response, 200, { order: publicOrderView(orders[index]) });
+    return true;
+  }
+
   if (request.method === "PATCH" && orderId && pathname.endsWith("/status")) {
     if (!requireAdmin(request, response)) return true;
     const body = await parseBody(request);
@@ -1570,8 +1696,7 @@ const handleOrdersApi = async (request, response, pathname) => {
       sendJson(response, 409, { error: "La livraison live exige un paiement confirmé." });
       return true;
     }
-    const alreadySent = orders[index].items.some((item) => item.fulfillment?.astralOrderId || item.fulfillment?.state === "accepted");
-    if (!alreadySent) await processAstralFulfillments(orders[index]);
+    await processAstralFulfillments(orders[index], { force: true });
     await writeJsonFile(ordersFile, orders);
     sendJson(response, 200, { order: publicOrderView(orders[index]) });
     return true;
@@ -1891,10 +2016,9 @@ const syncMoneyFusionPayment = async (payment, order) => {
   payment.updatedAt = new Date().toISOString();
   payment.lastVerifiedAt = payment.updatedAt;
   order.payment = { id: payment.id, provider: payment.provider, status: payment.status };
-  if (payment.status === "succeeded" && previousStatus !== "succeeded") {
-    if (order.status === "pending") appendOrderEvent(order, "processing", "Paiement Money Fusion confirmé.", "Paiement");
-    const alreadySent = order.items.some((item) => item.fulfillment?.astralOrderId || item.fulfillment?.state === "accepted");
-    if (!alreadySent) await processAstralFulfillments(order);
+  if (payment.status === "succeeded") {
+    if (previousStatus !== "succeeded" && order.status === "pending") appendOrderEvent(order, "processing", "Paiement Money Fusion confirmé.", "Paiement");
+    await processAstralFulfillments(order);
   }
   return { payment, order, remoteStatus, amountMatches, orderMatches };
 };
@@ -2125,8 +2249,7 @@ const handlePaymentsApi = async (request, response, pathname) => {
       order.payment = { id: payment.id, provider: payment.provider, status: payment.status };
       if (payment.status === "succeeded") {
         if (order.status === "pending") appendOrderEvent(order, "processing", "Paiement confirmé par le prestataire.", "Paiement");
-        const alreadySent = order.items.some((item) => item.fulfillment?.astralOrderId || item.fulfillment?.state === "accepted");
-        if (!alreadySent) await processAstralFulfillments(order);
+        await processAstralFulfillments(order);
       }
       await writeJsonFile(ordersFile, orders);
     }
@@ -2243,8 +2366,7 @@ const handleFedaPayApi = async (request, response, pathname) => {
       order.payment = { id: payment.id, provider: "fedapay", status: payment.status };
       if (payment.status === "succeeded") {
         if (order.status === "pending") appendOrderEvent(order, "processing", "Paiement FedaPay confirmé.", "Paiement");
-        const alreadySent = order.items.some((item) => item.fulfillment?.astralOrderId || item.fulfillment?.state === "accepted");
-        if (!alreadySent) await processAstralFulfillments(order);
+        await processAstralFulfillments(order);
       }
       if (["failed", "cancelled"].includes(payment.status)) appendOrderEvent(order, "pending", "Paiement FedaPay non finalisé.", "Paiement");
     }
@@ -2840,5 +2962,9 @@ export default requestHandler;
 if (!process.env.VERCEL) {
   createServer(requestHandler).listen(port, host, () => {
     process.stdout.write(`SILVERSE SHOP: http://${host}:${port}\n`);
+    const firstAstralReconciliation = setTimeout(() => void reconcilePaidAstralOrders(), 15_000);
+    const recurringAstralReconciliation = setInterval(() => void reconcilePaidAstralOrders(), astralOrderRetryIntervalMs);
+    firstAstralReconciliation.unref();
+    recurringAstralReconciliation.unref();
   });
 }

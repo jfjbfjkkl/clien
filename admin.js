@@ -84,11 +84,14 @@ const renderOrderDetail = (order) => {
   const locationLink = coordinates
     ? `<a class="admin-location-link" href="https://www.google.com/maps?q=${encodeURIComponent(`${coordinates.latitude},${coordinates.longitude}`)}" target="_blank" rel="noopener">Ouvrir la position sur la carte ↗</a>`
     : "";
+  const pendingDigitalForms = (order.items || []).filter((item) => item.provider === "astral" && !item.fulfillment?.astralOrderId && !["accepted", "processing", "running", "pending", "queued", "shipped", "sent", "delivered", "completed", "success", "done"].includes(String(item.fulfillment?.state || "").toLowerCase())).map((item) => `
+    <section class="admin-order-delivery-form"><span>Livraison numérique · ${escapeHtml(item.name)}</span><p>${escapeHtml(item.fulfillment?.error || "Informations à vérifier avant la transmission.")}</p><form class="admin-form" data-order-fulfillment-form data-order-id="${escapeHtml(order.id)}"><input type="hidden" name="itemId" value="${escapeHtml(item.id)}"><div class="admin-form-row"><label>UID / identifiant joueur<input name="playerId" value="${escapeHtml(item.fulfillment?.playerId || "")}" ${item.requiresPlayerId ? "required" : ""}></label><label>Région / serveur<input name="region" value="${escapeHtml(item.fulfillment?.region || "")}" ${item.requiresRegion ? "required" : ""}></label></div><label>Pseudo (facultatif)<input name="nickname" value="${escapeHtml(item.fulfillment?.nickname || "")}"></label><button class="admin-primary" type="submit">Enregistrer et transmettre</button></form></section>`).join("");
   content.innerHTML = `
     <section><span>Client</span><strong>${escapeHtml(`${customer.firstName || ""} ${customer.lastName || ""}`.trim() || "Client")}</strong><p>${escapeHtml(customer.email || "—")}<br>${escapeHtml(customer.phone || "—")}</p></section>
     <section><span>Livraison</span><strong>${escapeHtml(delivery?.methodLabel || "Commande digitale")}</strong><p>${escapeHtml(delivery?.statusLabel || "Livraison digitale")}${delivery ? " · délai annoncé : 24 h" : ""}</p>${address ? `<p>${escapeHtml(address)}</p>` : ""}${locationLink}</section>
     <section><span>Paiement</span><strong>${money(order.total)}</strong><p>${escapeHtml(order.payment?.status === "succeeded" ? "Paiement confirmé" : "Paiement en attente")}</p></section>
     <section class="admin-order-items"><span>Articles</span>${(order.items || []).map((item) => `<div><strong>${escapeHtml(item.name)}</strong><small>${item.qty || 1} × ${money(item.unitPrice)}</small></div>`).join("")}</section>
+    ${pendingDigitalForms}
     ${delivery ? `<section class="admin-order-delivery-form"><span>Confirmer ou modifier l’adresse</span><form class="admin-form" data-order-delivery-form data-order-id="${escapeHtml(order.id)}"><label>Adresse<input name="address" value="${escapeHtml(address ? (delivery.address?.address || customer.address || "") : "")}" required placeholder="Quartier, rue, repère"></label><div class="admin-form-row"><label>Ville<input name="city" value="${escapeHtml(delivery.address?.city || customer.city || "")}" required></label><label>Pays<input name="country" value="${escapeHtml(delivery.address?.country || customer.country || "Togo")}" required></label></div><button class="admin-primary" type="submit">Enregistrer l’adresse</button></form></section>` : ""}
   `;
   root.hidden = false;
@@ -187,6 +190,18 @@ $("[data-admin-search]").addEventListener("input", (event) => {
 $("[data-all-orders]").addEventListener("click", (event) => { const id = event.target.closest("[data-order-select]")?.dataset.orderSelect; if (!id) return; const order = state.orders.find((item) => item.id === id); renderOrderDetail(order); const input = $("[data-order-status-form] [name=reference]"); input.value = id; });
 $("[data-close-order-detail]")?.addEventListener("click", () => { $("[data-admin-order-detail]").hidden = true; });
 $("[data-admin-order-detail-content]")?.addEventListener("submit", async (event) => {
+  const fulfillmentForm = event.target.closest("[data-order-fulfillment-form]");
+  if (fulfillmentForm) {
+    event.preventDefault();
+    const values = Object.fromEntries(new FormData(fulfillmentForm));
+    try {
+      await adminFetch(`/api/orders/${encodeURIComponent(fulfillmentForm.dataset.orderId)}/fulfillment`, { method: "PATCH", body: JSON.stringify(values) });
+      showToast("Informations enregistrées, transmission relancée");
+      await loadAdmin();
+      renderOrderDetail(state.orders.find((item) => item.id === fulfillmentForm.dataset.orderId));
+    } catch (error) { showToast(error.message); }
+    return;
+  }
   const form = event.target.closest("[data-order-delivery-form]");
   if (!form) return;
   event.preventDefault();
