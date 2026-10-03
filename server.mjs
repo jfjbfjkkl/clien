@@ -673,6 +673,10 @@ const extractDigitalCodes = (payload) => {
       return;
     }
     if (typeof value === "object") {
+      if (codeKey.test(key) && Object.hasOwn(value, "value")) {
+        visit(value.value, "code", depth + 1);
+        return;
+      }
       Object.entries(value).forEach(([entryKey, entryValue]) => visit(entryValue, entryKey, depth + 1));
       return;
     }
