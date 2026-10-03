@@ -556,6 +556,16 @@ const astralRequest = async (path, { method = "GET", query = {}, body = null, pa
 };
 
 const getAstralPayloadData = (payload) => payload?.data || payload;
+const getAstralOrderPayloadData = (payload) => {
+  const data = getAstralPayloadData(payload) || {};
+  return data.order || data;
+};
+
+const getAstralOrderState = (data, fallback = "accepted") => data.fulfillment_status
+  || data.state
+  || data.status
+  || data.reseller_status
+  || fallback;
 
 const mapAstralState = (state) => {
   const normalized = String(state || "").toLowerCase();
@@ -655,7 +665,7 @@ const appendOrderEvent = (order, status, note, location = "SILVERSE SHOP") => {
 
 const extractDigitalCodes = (payload) => {
   const values = [];
-  const codeKey = /^(?:code|codes|gift_?code|redeem_?code|voucher(?:_?code)?|pin(?:_?code)?|serial(?:_?number)?|license_?key|activation_?key)$/i;
+  const codeKey = /^(?:code|codes|delivery_?codes?|gift_?code|redeem_?code|voucher(?:_?code)?|pin(?:_?code)?|serial(?:_?number)?|license_?key|activation_?key)$/i;
   const visit = (value, key = "", depth = 0) => {
     if (depth > 8 || value == null) return;
     if (Array.isArray(value)) {
@@ -1441,11 +1451,11 @@ const processAstralFulfillments = async (order, { force = false } = {}) => {
             query: { order_id: payload.partner_reference },
             partnerReference: payload.partner_reference
           });
-          const existingData = getAstralPayloadData(existingResult.payload) || {};
-          const existingState = existingData.state || existingData.status || "accepted";
+          const existingData = getAstralOrderPayloadData(existingResult.payload);
+          const existingState = getAstralOrderState(existingData);
           const existingFulfillment = {
             ...item.fulfillment,
-            astralOrderId: existingData.order_id || existingData.astral_order_id || item.fulfillment.astralOrderId,
+            astralOrderId: existingData.order_id || existingData.astral_order_id || existingData.external_reference || existingData.id || item.fulfillment.astralOrderId,
             state: existingState,
             total: existingData.total,
             currency: existingData.currency,
@@ -1518,9 +1528,9 @@ const syncOrderWithAstral = async (order) => {
         query: { order_id: item.fulfillment.partnerReference },
         partnerReference: item.fulfillment.partnerReference
       });
-      const data = getAstralPayloadData(result.payload) || {};
+      const data = getAstralOrderPayloadData(result.payload);
       const previousState = item.fulfillment.state;
-      const state = data.state || data.status || previousState;
+      const state = getAstralOrderState(data, previousState);
       item.fulfillment = { ...item.fulfillment, state, response: data };
       if (state && state !== previousState) {
         appendOrderEvent(order, mapAstralState(state), `Synchronisation Astral : ${state}.`, "Astral4Gamer");
