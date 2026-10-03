@@ -13,7 +13,10 @@ const routeAliases = {
 };
 const routeSegment = window.location.pathname.split("/").filter(Boolean).pop() || "";
 const currentPage = routeAliases[routeSegment] || routeSegment || "index.html";
-const currentProductId = new URLSearchParams(window.location.search).get("id") || "";
+const currentSearchParams = new URLSearchParams(window.location.search);
+const currentProductId = currentSearchParams.get("id") || "";
+const buyNowStorageKey = "silverse:buy-now";
+const buyNowCheckoutActive = currentPage === "checkout.html" && currentSearchParams.get("mode") === "buy-now";
 const isApiProductRoute = currentProductId.startsWith("product-");
 const activeUniverse = currentPage === "index.html"
   ? "home"
@@ -1102,10 +1105,20 @@ const saveFavorites = () => {
 };
 
 const saveCart = () => {
+  if (buyNowCheckoutActive) return;
   localStorage.setItem("silverse:cart", JSON.stringify(cart));
 };
 
 const loadCart = () => {
+  if (buyNowCheckoutActive) {
+    try {
+      const directProduct = JSON.parse(sessionStorage.getItem(buyNowStorageKey) || "null");
+      cart = directProduct ? [{ ...directProduct, qty: 1 }] : [];
+    } catch {
+      cart = [];
+    }
+    return;
+  }
   try {
     cart = JSON.parse(localStorage.getItem("silverse:cart") || "[]");
   } catch {
@@ -1332,7 +1345,7 @@ const renderProductDetail = () => {
         <p class="product-detail-lead">${product.short || product.description}</p>
         ${variations.length ? `<label class="product-variation-field">Choisissez une option<select data-product-variation>${variations.map((variation) => `<option value="${escapeHtml(variation.id)}" data-price="${Number(variation.price)}" data-name="${escapeHtml(variation.name)}">${escapeHtml(variation.name)} — ${escapeHtml(formatMoney(variation.price, product.currency))}</option>`).join("")}</select></label>` : ""}
         <div class="product-detail-actions" aria-label="Actions produit">
-          <button class="product-buy-now" type="button" data-buy-now>Acheter maintenant</button>
+          <button class="product-buy-now" type="button" data-buy-now>Payer maintenant</button>
           <button class="product-add-cart" type="button" data-add-cart>Ajouter au panier</button>
           <button class="product-detail-favorite" type="button" aria-label="Ajouter aux favoris" data-favorite-product><span>♡</span><strong>Favoris</strong></button>
         </div>
@@ -1407,12 +1420,21 @@ const renderProductDetail = () => {
 };
 
 const updateCartCount = () => {
-  count = cart.reduce((total, item) => total + (item.qty || 1), 0);
+  const checkoutCount = cart.reduce((total, item) => total + (item.qty || 1), 0);
   const total = cart.reduce((sum, item) => sum + (Number(item.rawPrice || 0) * Number(item.qty || 1)) + Number(item.shippingFee || 0), 0);
+  let navigationCart = cart;
+  if (buyNowCheckoutActive) {
+    try {
+      navigationCart = JSON.parse(localStorage.getItem("silverse:cart") || "[]");
+    } catch {
+      navigationCart = [];
+    }
+  }
+  count = navigationCart.reduce((quantity, item) => quantity + (item.qty || 1), 0);
   if (cartCount) cartCount.textContent = String(count);
   cartPageSummaries.forEach((summary) => {
-    summary.textContent = count
-      ? `${count} article${count > 1 ? "s" : ""} · Total confirmé : ${formatMoney(total)}`
+    summary.textContent = checkoutCount
+      ? `${checkoutCount} article${checkoutCount > 1 ? "s" : ""} · Total confirmé : ${formatMoney(total)}`
       : "0 article dans le panier";
   });
 };
@@ -1797,11 +1819,9 @@ document.addEventListener("click", (event) => {
   const button = event.target.closest("[data-buy-now]");
   if (!button) return;
   const product = getProductFromElement(button);
-  addToCart(product);
-  showToast("Produit ajouté. Redirection vers le paiement");
-  window.setTimeout(() => {
-    window.location.href = "checkout.html";
-  }, 520);
+  sessionStorage.setItem(buyNowStorageKey, JSON.stringify({ ...product, qty: 1 }));
+  showToast("Ouverture du paiement sécurisé");
+  window.location.href = "checkout.html?mode=buy-now";
 });
 
 document.querySelectorAll(".cart-button").forEach((button) => {
@@ -2270,7 +2290,8 @@ document.querySelectorAll("[data-checkout-submit]").forEach((button) => {
       if (!paymentResponse.ok) throw new Error(`${paymentData.error || "Paiement Money Fusion indisponible"} Commande conservée : ${data.order.id}`);
 
       cart = [];
-      saveCart();
+      if (buyNowCheckoutActive) sessionStorage.removeItem(buyNowStorageKey);
+      else saveCart();
       updateCartCount();
       renderCartPage();
       localStorage.setItem("silverse:last-order", JSON.stringify({ id: data.order.id, trackingNumber: data.order.trackingNumber }));
